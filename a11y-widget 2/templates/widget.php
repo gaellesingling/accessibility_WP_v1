@@ -23,13 +23,19 @@
       <?php $sections = a11y_widget_get_sections(); ?>
       <?php if ( ! empty( $sections ) ) : ?>
         <?php
-        $tablist_id  = 'a11y-section-tabs';
-        $tabpanel_id = 'a11y-section-panel';
-        $template_id = 'a11y-feature-template';
-        $payload     = array();
+        $tablist_id   = 'a11y-section-tabs';
+        $tabpanel_id  = 'a11y-section-panel';
+        $template_id  = 'a11y-feature-template';
+        $payload      = array();
         $first_tab_id = '';
         ?>
-        <nav id="<?php echo esc_attr( $tablist_id ); ?>" class="a11y-tabs" role="tablist" aria-label="<?php echo esc_attr__( 'Catégories d’accessibilité', 'a11y-widget' ); ?>">
+        <nav
+          id="<?php echo esc_attr( $tablist_id ); ?>"
+          class="a11y-tabs"
+          role="tablist"
+          aria-label="<?php echo esc_attr__( 'Catégories d’accessibilité', 'a11y-widget' ); ?>"
+          data-role="section-tablist"
+        >
           <?php foreach ( $sections as $index => $section ) :
             $section_slug  = ! empty( $section['slug'] ) ? sanitize_title( $section['slug'] ) : '';
             $section_id    = $section_slug ? $section_slug : ( ! empty( $section['id'] ) ? sanitize_title( $section['id'] ) : sanitize_title( uniqid( 'a11y-sec-', true ) ) );
@@ -65,12 +71,12 @@
                 'features' => $features_data,
             );
 
-            $tab_id     = 'a11y-tab-' . $section_id;
-            $is_active  = 0 === (int) $index;
+            $tab_id    = 'a11y-tab-' . $section_id;
+            $is_active = 0 === (int) $index;
             if ( $is_active && '' === $first_tab_id ) {
-                $first_tab_id = 'a11y-tab-' . $section_id;
+                $first_tab_id = $tab_id;
             }
-            $tab_class  = 'a11y-tab' . ( $is_active ? ' is-active' : '' );
+            $tab_class = 'a11y-tab' . ( $is_active ? ' is-active' : '' );
             ?>
             <button
               type="button"
@@ -80,6 +86,7 @@
               aria-selected="<?php echo $is_active ? 'true' : 'false'; ?>"
               aria-controls="<?php echo esc_attr( $tabpanel_id ); ?>"
               tabindex="<?php echo $is_active ? '0' : '-1'; ?>"
+              data-role="section-tab"
               data-section-index="<?php echo esc_attr( $index ); ?>"
               data-section-id="<?php echo esc_attr( $section_id ); ?>"
               data-tablist-id="<?php echo esc_attr( $tablist_id ); ?>"
@@ -89,7 +96,7 @@
           <?php endforeach; ?>
         </nav>
 
-        <div
+        <section
           class="a11y-section-panel"
           role="tabpanel"
           id="<?php echo esc_attr( $tabpanel_id ); ?>"
@@ -100,15 +107,15 @@
         >
           <div class="a11y-grid" data-role="feature-grid"></div>
           <p class="a11y-empty" data-role="feature-empty" hidden><?php echo esc_html__( 'Aucune fonctionnalité disponible pour le moment.', 'a11y-widget' ); ?></p>
-        </div>
+        </section>
 
-        <template id="<?php echo esc_attr( $template_id ); ?>" data-role="feature-template">
-          <article class="a11y-card">
-            <div class="meta">
+        <template id="<?php echo esc_attr( $template_id ); ?>" data-role="feature-placeholder-template">
+          <article class="a11y-card" data-role="feature-card">
+            <div class="meta" data-role="feature-meta">
               <span class="label" data-role="feature-label"></span>
               <span class="hint" data-role="feature-hint" hidden></span>
             </div>
-            <label class="a11y-switch">
+            <label class="a11y-switch" data-role="feature-switch">
               <input type="checkbox" data-role="feature-input" data-feature="" aria-label="" />
               <span class="track"></span><span class="thumb"></span>
             </label>
