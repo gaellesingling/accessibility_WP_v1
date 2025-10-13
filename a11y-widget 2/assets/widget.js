@@ -4,6 +4,7 @@
  */
 (function(){
   const STORAGE_KEY = 'a11y-widget-prefs:v1';
+  const LAUNCHER_POS_KEY = 'a11y-widget-launcher-pos:v1';
 
   // -------- API publique --------
   const listeners = new Map(); // key -> Set<fct>
@@ -31,6 +32,170 @@
   const resetBtn = document.getElementById('a11y-reset');
 
   const featureInputs = Array.from(document.querySelectorAll('[data-feature]'));
+
+  let launcherLastPos = null;
+  let hasCustomLauncherPosition = false;
+  let skipNextClick = false;
+  let dragMoved = false;
+  let dragging = false;
+  let dragPointerId = null;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+  let dragStartPos = null;
+  let activeTouchId = null;
+  const supportsPointer = 'PointerEvent' in window;
+
+  function getCurrentLauncherPosition(){
+    if(!btn){ return { x: 0, y: 0 }; }
+    const rect = btn.getBoundingClientRect();
+    return { x: rect.left, y: rect.top };
+  }
+
+  function clampLauncherPosition(x, y){
+    if(!btn){ return { x, y }; }
+    const rect = btn.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const maxX = Math.max(0, window.innerWidth - width);
+    const maxY = Math.max(0, window.innerHeight - height);
+    return {
+      x: Math.min(Math.max(x, 0), maxX),
+      y: Math.min(Math.max(y, 0), maxY)
+    };
+  }
+
+  function applyLauncherPosition(x, y){
+    document.documentElement.style.setProperty('--a11y-launcher-x', `${x}px`);
+    document.documentElement.style.setProperty('--a11y-launcher-y', `${y}px`);
+    launcherLastPos = { x, y };
+  }
+
+  function persistLauncherPosition(x, y){
+    hasCustomLauncherPosition = true;
+    try {
+      localStorage.setItem(LAUNCHER_POS_KEY, JSON.stringify({ x, y }));
+    } catch(err){ /* ignore */ }
+  }
+
+  function restoreLauncherPosition(){
+    if(!btn) return;
+    try {
+      const raw = localStorage.getItem(LAUNCHER_POS_KEY);
+      if(!raw) return;
+      const data = JSON.parse(raw);
+      if(typeof data.x !== 'number' || typeof data.y !== 'number') return;
+      const clamped = clampLauncherPosition(data.x, data.y);
+      applyLauncherPosition(clamped.x, clamped.y);
+      hasCustomLauncherPosition = true;
+      if(clamped.x !== data.x || clamped.y !== data.y){
+        persistLauncherPosition(clamped.x, clamped.y);
+      }
+    } catch(err){ /* ignore */ }
+  }
+
+  function startDragging(clientX, clientY){
+    if(!btn) return;
+    skipNextClick = false;
+    dragMoved = false;
+    const rect = btn.getBoundingClientRect();
+    dragOffsetX = clientX - rect.left;
+    dragOffsetY = clientY - rect.top;
+    dragStartPos = { x: rect.left, y: rect.top };
+    launcherLastPos = { x: rect.left, y: rect.top };
+    dragging = true;
+  }
+
+  function moveDragging(clientX, clientY){
+    if(!dragging) return;
+    const targetX = clientX - dragOffsetX;
+    const targetY = clientY - dragOffsetY;
+    const clamped = clampLauncherPosition(targetX, targetY);
+    applyLauncherPosition(clamped.x, clamped.y);
+    if(Math.abs(clamped.x - dragStartPos.x) > 1 || Math.abs(clamped.y - dragStartPos.y) > 1){
+      dragMoved = true;
+    }
+  }
+
+  function endDragging(){
+    if(!dragging) return;
+    dragging = false;
+    dragPointerId = null;
+    activeTouchId = null;
+    if(dragMoved && launcherLastPos){
+      persistLauncherPosition(launcherLastPos.x, launcherLastPos.y);
+      skipNextClick = true;
+      setTimeout(()=>{ skipNextClick = false; }, 0);
+    } else {
+      skipNextClick = false;
+    }
+    dragMoved = false;
+  }
+
+  function handleResize(){
+    if(!btn || !hasCustomLauncherPosition) return;
+    const current = getCurrentLauncherPosition();
+    const clamped = clampLauncherPosition(current.x, current.y);
+    if(clamped.x !== current.x || clamped.y !== current.y){
+      applyLauncherPosition(clamped.x, clamped.y);
+      persistLauncherPosition(clamped.x, clamped.y);
+    }
+  }
+
+  function onPointerDown(e){
+    if(e.pointerType === 'mouse' && e.button !== 0) return;
+    dragPointerId = e.pointerId;
+    startDragging(e.clientX, e.clientY);
+    if(btn.setPointerCapture){
+      try { btn.setPointerCapture(dragPointerId); } catch(err){}
+    }
+    if(e.pointerType !== 'mouse'){
+      e.preventDefault();
+    }
+  }
+
+  function onPointerMove(e){
+    if(!dragging || e.pointerId !== dragPointerId) return;
+    moveDragging(e.clientX, e.clientY);
+  }
+
+  function onPointerUp(e){
+    if(e.pointerId !== dragPointerId) return;
+    if(btn.releasePointerCapture){
+      try { btn.releasePointerCapture(dragPointerId); } catch(err){}
+    }
+    endDragging();
+  }
+
+  function findTouchById(touchList, id){
+    for(let i=0;i<touchList.length;i++){
+      if(touchList[i].identifier === id) return touchList[i];
+    }
+    return null;
+  }
+
+  function onTouchStart(e){
+    if(e.touches.length > 1) return;
+    const touch = e.changedTouches[0];
+    if(!touch) return;
+    activeTouchId = touch.identifier;
+    startDragging(touch.clientX, touch.clientY);
+    e.preventDefault();
+  }
+
+  function onTouchMove(e){
+    if(activeTouchId === null) return;
+    const touch = findTouchById(e.changedTouches, activeTouchId);
+    if(!touch) return;
+    moveDragging(touch.clientX, touch.clientY);
+    e.preventDefault();
+  }
+
+  function onTouchEnd(e){
+    if(activeTouchId === null) return;
+    const touch = findTouchById(e.changedTouches, activeTouchId);
+    if(!touch) return;
+    endDragging();
+  }
 
   // ---------- Focus trap ----------
   let lastFocused = null;
@@ -97,7 +262,27 @@
 
   // ---------- Wiring ----------
   if(btn){
-    btn.addEventListener('click', openPanel);
+    btn.addEventListener('click', (e)=>{
+      if(skipNextClick){
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        skipNextClick = false;
+        return;
+      }
+      openPanel();
+    });
+
+    if(supportsPointer){
+      btn.addEventListener('pointerdown', onPointerDown);
+      btn.addEventListener('pointermove', onPointerMove);
+      btn.addEventListener('pointerup', onPointerUp);
+      btn.addEventListener('pointercancel', onPointerUp);
+    } else {
+      btn.addEventListener('touchstart', onTouchStart, { passive: false });
+      window.addEventListener('touchmove', onTouchMove, { passive: false });
+      window.addEventListener('touchend', onTouchEnd);
+      window.addEventListener('touchcancel', onTouchEnd);
+    }
   }
   if(overlay){
     overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closePanel(); });
@@ -108,6 +293,11 @@
     resetBtn.addEventListener('click', ()=>{
       featureInputs.forEach(i=>{ i.checked = false; toggleFeature(i.dataset.feature, false); });
       try { localStorage.removeItem(STORAGE_KEY); } catch(err){}
+      try { localStorage.removeItem(LAUNCHER_POS_KEY); } catch(err){}
+      document.documentElement.style.removeProperty('--a11y-launcher-x');
+      document.documentElement.style.removeProperty('--a11y-launcher-y');
+      launcherLastPos = null;
+      hasCustomLauncherPosition = false;
     });
   }
   featureInputs.forEach(input => {
@@ -115,6 +305,8 @@
   });
 
   restore();
+  restoreLauncherPosition();
+  if(btn){ window.addEventListener('resize', handleResize); }
 
 })();
 

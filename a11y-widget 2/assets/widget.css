@@ -13,11 +13,13 @@
   --a11y-radius: 16px;
   --a11y-z: 2147483646; /* below the panel */
   --a11y-z-panel: 2147483647; /* top */
+  --a11y-launcher-x: calc(100vw - 76px);
+  --a11y-launcher-y: calc(100vh - 76px);
 }
 
 /* Button (launcher) */
 .a11y-launcher {
-  position: fixed; right: 20px; bottom: 20px; z-index: var(--a11y-z);
+  position: fixed; left: var(--a11y-launcher-x); top: var(--a11y-launcher-y); z-index: var(--a11y-z);
   display: inline-flex; align-items: center; justify-content: center;
   width: 56px; height: 56px; border-radius: 999px; border: none;
   background: var(--a11y-primary); color: var(--a11y-primary-contrast);
