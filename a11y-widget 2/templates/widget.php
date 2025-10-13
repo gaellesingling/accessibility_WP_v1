@@ -18,43 +18,68 @@
     </header>
 
     <div class="a11y-content" id="a11y-content">
-      <p id="a11y-desc" style="padding: 8px 12px; margin: 0;"><?php echo esc_html__('Adaptez le site selon vos préférences. Les options sont des emplacements vides. À vous de brancher vos styles/scripts.', 'a11y-widget'); ?></p>
+      <p id="a11y-desc" class="a11y-intro"><?php echo esc_html__('Adaptez le site selon vos préférences. Les options sont des emplacements vides. À vous de brancher vos styles/scripts.', 'a11y-widget'); ?></p>
 
-      <?php $sections = a11y_widget_get_sections(); ?>
+      <?php
+      $sections          = a11y_widget_get_sections();
+      $first_section_id  = 'a11y-sec-0';
+      $used_section_ids  = array();
+      ?>
       <?php if ( ! empty( $sections ) ) : ?>
-      <?php foreach ( $sections as $section ) : ?>
-        <?php
-        $section_id    = ! empty( $section['id'] ) ? sanitize_title( $section['id'] ) : sanitize_title( uniqid( 'a11y-sec-', true ) );
-        $section_title = isset( $section['title'] ) ? $section['title'] : '';
-        $features      = isset( $section['features'] ) ? (array) $section['features'] : array();
-        ?>
-        <section class="a11y-section" aria-labelledby="a11y-section-<?php echo esc_attr( $section_id ); ?>">
-          <h3 id="a11y-section-<?php echo esc_attr( $section_id ); ?>"><?php echo esc_html( $section_title ); ?></h3>
-          <?php if ( ! empty( $features ) ) : ?>
-            <div class="a11y-grid">
-              <?php foreach ( $features as $feature ) :
-                $slug       = isset( $feature['slug'] ) ? $feature['slug'] : '';
-                $label      = isset( $feature['label'] ) ? $feature['label'] : '';
-                $hint       = isset( $feature['hint'] ) ? $feature['hint'] : '';
-                $aria_label = isset( $feature['aria_label'] ) ? $feature['aria_label'] : $label;
-                if ( '' === $slug || '' === $label ) {
-                    continue;
-                }
-                ?>
-                <article class="a11y-card">
-                  <div class="meta"><span class="label"><?php echo esc_html( $label ); ?></span><?php if ( '' !== $hint ) : ?><span class="hint"><?php echo esc_html( $hint ); ?></span><?php endif; ?></div>
-                  <label class="a11y-switch">
-                    <input type="checkbox" data-feature="<?php echo esc_attr( $slug ); ?>" aria-label="<?php echo esc_attr( $aria_label ); ?>" />
-                    <span class="track"></span><span class="thumb"></span>
-                  </label>
-                </article>
-              <?php endforeach; ?>
-            </div>
-          <?php else : ?>
-            <p class="a11y-empty"><?php echo esc_html__( 'Aucune fonctionnalité disponible pour le moment.', 'a11y-widget' ); ?></p>
-          <?php endif; ?>
+        <div class="a11y-nav" id="a11y-sections" role="tablist" aria-label="<?php echo esc_attr__( 'Catégories d’accessibilité', 'a11y-widget' ); ?>">
+          <?php foreach ( $sections as $index => $section ) :
+            $section_id = ! empty( $section['id'] ) ? sanitize_title( $section['id'] ) : 'a11y-sec-' . $index;
+            if ( '' === $section_id ) {
+                $section_id = 'a11y-sec-' . $index;
+            }
+            if ( in_array( $section_id, $used_section_ids, true ) ) {
+                $section_id = 'a11y-sec-' . $index;
+            }
+            $used_section_ids[] = $section_id;
+            if ( 0 === $index ) {
+                $first_section_id = $section_id;
+            }
+            $section_title = isset( $section['title'] ) ? $section['title'] : '';
+            $section_hint  = isset( $section['hint'] ) ? $section['hint'] : '';
+            $tab_id        = 'a11y-tab-' . $section_id;
+            ?>
+            <button
+              type="button"
+              class="a11y-tab<?php echo 0 === $index ? ' is-active' : ''; ?>"
+              id="<?php echo esc_attr( $tab_id ); ?>"
+              role="tab"
+              aria-selected="<?php echo 0 === $index ? 'true' : 'false'; ?>"
+              aria-controls="a11y-section-panel"
+              tabindex="<?php echo 0 === $index ? '0' : '-1'; ?>"
+              data-section-index="<?php echo esc_attr( $index ); ?>"
+            >
+              <span class="a11y-tab__label"><?php echo esc_html( $section_title ); ?></span>
+              <?php if ( '' !== $section_hint ) : ?>
+                <span class="a11y-tab__hint"><?php echo esc_html( $section_hint ); ?></span>
+              <?php endif; ?>
+            </button>
+          <?php endforeach; ?>
+        </div>
+
+        <section class="a11y-level2" id="a11y-section-panel" role="tabpanel" tabindex="0" aria-live="polite" aria-labelledby="<?php echo esc_attr( 'a11y-tab-' . $first_section_id ); ?>">
+          <div class="a11y-grid" data-role="feature-grid"></div>
+          <p class="a11y-empty" data-role="empty" hidden data-default-empty="<?php echo esc_attr__( 'Aucune fonctionnalité disponible pour le moment.', 'a11y-widget' ); ?>"><?php echo esc_html__( 'Aucune fonctionnalité disponible pour le moment.', 'a11y-widget' ); ?></p>
         </section>
-      <?php endforeach; ?>
+
+        <template id="a11y-feature-template">
+          <article class="a11y-card">
+            <div class="meta">
+              <span class="label"></span>
+              <span class="hint" hidden></span>
+            </div>
+            <label class="a11y-switch">
+              <input type="checkbox" data-feature="" />
+              <span class="track"></span><span class="thumb"></span>
+            </label>
+          </article>
+        </template>
+
+        <script type="application/json" id="a11y-widget-data"><?php echo wp_json_encode( $sections ); ?></script>
       <?php else : ?>
         <p class="a11y-empty"><?php echo esc_html__( 'Aucune fonctionnalité disponible pour le moment.', 'a11y-widget' ); ?></p>
       <?php endif; ?>

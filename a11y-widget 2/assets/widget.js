@@ -24,6 +24,135 @@
     return s.split('-').map((p,i)=> p.charAt(0).toUpperCase()+p.slice(1)).join('');
   }
 
+  function ensureFeatureState(slug){
+    if(!slug) return;
+    if(!featureState.has(slug)){
+      featureState.set(slug, false);
+    }
+  }
+
+  function seedFeatureState(){
+    if(!Array.isArray(sectionsData)) return;
+    sectionsData.forEach(section => {
+      if(!section || !Array.isArray(section.features)) return;
+      section.features.forEach(feature => {
+        if(!feature) return;
+        const slug = typeof feature.slug === 'string' ? feature.slug : '';
+        if(slug) ensureFeatureState(slug);
+      });
+    });
+  }
+
+  function updateTabState(index){
+    if(!tabs.length) return null;
+    let activeTab = null;
+    tabs.forEach((tab, i) => {
+      const isActive = i === index;
+      tab.classList.toggle('is-active', isActive);
+      tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      tab.setAttribute('tabindex', isActive ? '0' : '-1');
+      if(isActive){ activeTab = tab; }
+    });
+    return activeTab;
+  }
+
+  function createFeatureCard(feature){
+    if(!feature || !featureGrid) return null;
+    const card = featureTemplate && featureTemplate.content && featureTemplate.content.firstElementChild
+      ? featureTemplate.content.firstElementChild.cloneNode(true)
+      : (function(){
+          const article = document.createElement('article');
+          article.className = 'a11y-card';
+          article.innerHTML = '<div class="meta"><span class="label"></span><span class="hint" hidden></span></div>' +
+            '<label class="a11y-switch"><input type="checkbox" data-feature="" />' +
+            '<span class="track"></span><span class="thumb"></span></label>';
+          return article;
+        })();
+
+    const labelEl = card.querySelector('.label');
+    if(labelEl){ labelEl.textContent = feature.label || ''; }
+
+    const hintEl = card.querySelector('.hint');
+    if(hintEl){
+      if(feature.hint){
+        hintEl.textContent = feature.hint;
+        hintEl.hidden = false;
+      } else {
+        hintEl.textContent = '';
+        hintEl.hidden = true;
+      }
+    }
+
+    const input = card.querySelector('input[type="checkbox"]');
+    if(input){
+      input.dataset.feature = feature.slug;
+      const aria = feature.aria_label || feature.label || feature.slug;
+      if(aria){ input.setAttribute('aria-label', aria); }
+      ensureFeatureState(feature.slug);
+      input.checked = featureState.get(feature.slug) === true;
+      input.addEventListener('change', () => {
+        toggleFeature(feature.slug, input.checked);
+      });
+      featureInputs.push(input);
+    }
+
+    return card;
+  }
+
+  function showEmptyMessage(section){
+    if(!emptyMessage) return;
+    const fallback = emptyMessage.dataset ? (emptyMessage.dataset.defaultEmpty || emptyMessage.textContent) : emptyMessage.textContent;
+    let label = fallback;
+    if(section && typeof section.empty_label === 'string' && section.empty_label.trim() !== ''){
+      label = section.empty_label;
+    }
+    emptyMessage.textContent = label;
+    emptyMessage.hidden = false;
+  }
+
+  function hideEmptyMessage(){
+    if(emptyMessage){ emptyMessage.hidden = true; }
+  }
+
+  function renderSection(index, opts={}){
+    if(!panel || !featureGrid || !tabs.length) return;
+    if(index < 0 || index >= tabs.length) index = 0;
+    activeSectionIndex = index;
+
+    const activeTab = updateTabState(index);
+    if(activeTab){ panel.setAttribute('aria-labelledby', activeTab.id); }
+
+    featureInputs = [];
+    featureGrid.innerHTML = '';
+
+    const section = Array.isArray(sectionsData) ? sectionsData[index] : null;
+    const features = section && Array.isArray(section.features) ? section.features : [];
+
+    if(!features.length){
+      showEmptyMessage(section);
+      if(opts.focusPanel){ panel.focus(); }
+      return;
+    }
+
+    hideEmptyMessage();
+
+    features.forEach(feature => {
+      if(!feature) return;
+      const slug = typeof feature.slug === 'string' ? feature.slug.trim() : '';
+      const label = typeof feature.label === 'string' ? feature.label : '';
+      if(!slug || !label) return;
+      const card = createFeatureCard({
+        slug,
+        label,
+        hint: typeof feature.hint === 'string' ? feature.hint : '',
+        aria_label: typeof feature.aria_label === 'string' ? feature.aria_label : ''
+      });
+      if(card){ featureGrid.appendChild(card); }
+    });
+
+    if(opts.focusPanel){ panel.focus(); }
+  }
+
   // ---------- Elements ----------
   const btn = document.getElementById('a11y-launcher');
   const overlay = document.getElementById('a11y-overlay');
@@ -31,7 +160,27 @@
   const closeBtn2 = document.getElementById('a11y-close2');
   const resetBtn = document.getElementById('a11y-reset');
 
-  const featureInputs = Array.from(document.querySelectorAll('[data-feature]'));
+  const nav = document.getElementById('a11y-sections');
+  const panel = document.getElementById('a11y-section-panel');
+  const featureGrid = panel ? panel.querySelector('[data-role="feature-grid"]') : null;
+  const emptyMessage = panel ? panel.querySelector('[data-role="empty"]') : null;
+  const featureTemplate = document.getElementById('a11y-feature-template');
+  const dataScript = document.getElementById('a11y-widget-data');
+
+  let sectionsData = [];
+  if(dataScript){
+    try {
+      const rawData = dataScript.textContent || dataScript.innerText || '[]';
+      const parsed = JSON.parse(rawData);
+      if(Array.isArray(parsed)) sectionsData = parsed;
+    } catch(err){ sectionsData = []; }
+  }
+
+  const tabs = nav ? Array.from(nav.querySelectorAll('[role="tab"]')) : [];
+  let featureInputs = [];
+  const featureState = new Map();
+  let activeSectionIndex = tabs.findIndex(tab => tab.getAttribute('aria-selected') === 'true');
+  if(activeSectionIndex < 0) activeSectionIndex = 0;
 
   let launcherLastPos = null;
   let hasCustomLauncherPosition = false;
@@ -230,7 +379,9 @@
   // ---------- Persistance ----------
   function persist(){
     const data = {};
-    featureInputs.forEach(input => { data[input.dataset.feature] = input.checked; });
+    featureState.forEach((value, key) => {
+      data[key] = value;
+    });
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(err){ /* ignore */ }
   }
   function restore(){
@@ -239,16 +390,19 @@
       const data = JSON.parse(raw);
       for(const key in data){
         const val = !!data[key];
-        const input = featureInputs.find(i=>i.dataset.feature===key);
-        if(input){ input.checked = val; toggleFeature(key, val, {silent:true}); }
+        toggleFeature(key, val, {silent:true});
       }
     } catch(err){ /* ignore */ }
   }
 
   // ---------- Core toggle ----------
   function toggleFeature(key, on, opts={}){
+    if(!key) return;
     const attr = 'a11y' + dashToCamel(key);
-    if(on) document.documentElement.dataset[attr] = 'on';
+    const normalized = !!on;
+    ensureFeatureState(key);
+    featureState.set(key, normalized);
+    if(normalized) document.documentElement.dataset[attr] = 'on';
     else delete document.documentElement.dataset[attr];
 
     const ev = new CustomEvent('a11y:toggle', { detail: { key, on } });
@@ -256,6 +410,11 @@
 
     const set = listeners.get(key);
     if(set) for(const fn of set) try { fn(on, key); } catch(e){}
+
+    if(!opts.skipInputSync){
+      const input = featureInputs.find(i=>i.dataset.feature===key);
+      if(input && input.checked !== normalized){ input.checked = normalized; }
+    }
 
     if(!opts.silent) persist();
   }
@@ -291,7 +450,7 @@
   if(closeBtn2){ closeBtn2.addEventListener('click', closePanel); }
   if(resetBtn){
     resetBtn.addEventListener('click', ()=>{
-      featureInputs.forEach(i=>{ i.checked = false; toggleFeature(i.dataset.feature, false); });
+      featureState.forEach((_, key)=>{ toggleFeature(key, false, {silent:true}); });
       try { localStorage.removeItem(STORAGE_KEY); } catch(err){}
       try { localStorage.removeItem(LAUNCHER_POS_KEY); } catch(err){}
       document.documentElement.style.removeProperty('--a11y-launcher-x');
@@ -300,11 +459,65 @@
       hasCustomLauncherPosition = false;
     });
   }
-  featureInputs.forEach(input => {
-    input.addEventListener('change', () => toggleFeature(input.dataset.feature, input.checked));
-  });
+  if(nav && tabs.length){
+    nav.addEventListener('click', (e)=>{
+      const tab = e.target.closest('[role="tab"]');
+      if(!tab || !nav.contains(tab)) return;
+      const index = tabs.indexOf(tab);
+      if(index === -1) return;
+      e.preventDefault();
+      if(index !== activeSectionIndex){
+        renderSection(index);
+      }
+    });
 
+    nav.addEventListener('keydown', (e)=>{
+      const key = e.key;
+      const currentIndex = tabs.indexOf(document.activeElement);
+      if(currentIndex === -1) return;
+
+      if(key === 'Enter' || key === ' ' || key === 'Spacebar'){
+        e.preventDefault();
+        renderSection(currentIndex);
+        return;
+      }
+
+      let targetIndex = null;
+      if(key === 'ArrowRight' || key === 'ArrowDown'){
+        targetIndex = (currentIndex + 1) % tabs.length;
+      } else if(key === 'ArrowLeft' || key === 'ArrowUp'){
+        targetIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+      } else if(key === 'Home'){
+        targetIndex = 0;
+      } else if(key === 'End'){
+        targetIndex = tabs.length - 1;
+      }
+
+      if(targetIndex === null) return;
+      e.preventDefault();
+      const nextTab = tabs[targetIndex];
+      if(nextTab){
+        nextTab.focus();
+        renderSection(targetIndex);
+      }
+    });
+  }
+
+  seedFeatureState();
   restore();
+
+  if(nav && tabs.length && panel && featureGrid){
+    renderSection(activeSectionIndex);
+  } else {
+    featureInputs = Array.from(document.querySelectorAll('[data-feature]'));
+    featureInputs.forEach(input => {
+      if(!input || !input.dataset) return;
+      ensureFeatureState(input.dataset.feature);
+      input.checked = featureState.get(input.dataset.feature) === true;
+      input.addEventListener('change', () => toggleFeature(input.dataset.feature, input.checked));
+    });
+  }
+
   restoreLauncherPosition();
   if(btn){ window.addEventListener('resize', handleResize); }
 
