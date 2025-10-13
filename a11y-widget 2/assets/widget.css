@@ -58,6 +58,7 @@
 .a11y-card .meta { display: grid; gap: 2px; }
 .a11y-card .label { font-weight: 600; }
 .a11y-card .hint { font-size: .85rem; color: #555; }
+.a11y-empty { margin: 0 2px 12px; font-size: .9rem; color: #555; }
 
 /* Switch */
 .a11y-switch { margin-left: auto; position: relative; width: 46px; height: 28px; }

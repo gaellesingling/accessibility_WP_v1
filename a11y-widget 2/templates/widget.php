@@ -20,104 +20,44 @@
     <div class="a11y-content" id="a11y-content">
       <p id="a11y-desc" style="padding: 8px 12px; margin: 0;"><?php echo esc_html__('Adaptez le site selon vos préférences. Les options sont des emplacements vides. À vous de brancher vos styles/scripts.', 'a11y-widget'); ?></p>
 
-      <section class="a11y-section" aria-labelledby="a11y-section-cog">
-        <h3 id="a11y-section-cog"><?php echo esc_html__('Besoins cognitifs', 'a11y-widget'); ?></h3>
-        <div class="a11y-grid">
-          <article class="a11y-card">
-            <div class="meta"><span class="label"><?php echo esc_html__('Dyslexie', 'a11y-widget'); ?></span><span class="hint"><?php echo esc_html__('Placez votre police/espacement', 'a11y-widget'); ?></span></div>
-            <label class="a11y-switch">
-              <input type="checkbox" data-feature="dyslexie" aria-label="<?php echo esc_attr__('Activer le profil dyslexie', 'a11y-widget'); ?>" />
-              <span class="track"></span><span class="thumb"></span>
-            </label>
-          </article>
-
-          <article class="a11y-card">
-            <div class="meta"><span class="label"><?php echo esc_html__('Lecture facilitée', 'a11y-widget'); ?></span><span class="hint"><?php echo esc_html__('Ex : guide de lecture, surlignage', 'a11y-widget'); ?></span></div>
-            <label class="a11y-switch">
-              <input type="checkbox" data-feature="lecture" aria-label="<?php echo esc_attr__('Activer la lecture facilitée', 'a11y-widget'); ?>" />
-              <span class="track"></span><span class="thumb"></span>
-            </label>
-          </article>
-        </div>
-      </section>
-
-      <section class="a11y-section" aria-labelledby="a11y-section-visuel">
-        <h3 id="a11y-section-visuel"><?php echo esc_html__('Besoins visuels', 'a11y-widget'); ?></h3>
-        <div class="a11y-grid">
-          <article class="a11y-card">
-            <div class="meta"><span class="label"><?php echo esc_html__('Texte plus grand', 'a11y-widget'); ?></span><span class="hint"><?php echo esc_html__('Ex : +15% / +30%', 'a11y-widget'); ?></span></div>
-            <label class="a11y-switch">
-              <input type="checkbox" data-feature="texte-plus-grand" aria-label="<?php echo esc_attr__('Augmenter la taille du texte', 'a11y-widget'); ?>" />
-              <span class="track"></span><span class="thumb"></span>
-            </label>
-          </article>
-
-          <article class="a11y-card">
-            <div class="meta"><span class="label"><?php echo esc_html__('Contraste renforcé', 'a11y-widget'); ?></span><span class="hint"><?php echo esc_html__('Placeholder (high contrast)', 'a11y-widget'); ?></span></div>
-            <label class="a11y-switch">
-              <input type="checkbox" data-feature="contraste" aria-label="<?php echo esc_attr__('Activer le contraste renforcé', 'a11y-widget'); ?>" />
-              <span class="track"></span><span class="thumb"></span>
-            </label>
-          </article>
-
-          <article class="a11y-card">
-            <div class="meta"><span class="label"><?php echo esc_html__('Mode nuit', 'a11y-widget'); ?></span><span class="hint"><?php echo esc_html__('Placeholder (thème sombre)', 'a11y-widget'); ?></span></div>
-            <label class="a11y-switch">
-              <input type="checkbox" data-feature="mode-nuit" aria-label="<?php echo esc_attr__('Activer le mode nuit', 'a11y-widget'); ?>" />
-              <span class="track"></span><span class="thumb"></span>
-            </label>
-          </article>
-
-          <article class="a11y-card">
-            <div class="meta"><span class="label"><?php echo esc_html__('Réduire la lumière bleue', 'a11y-widget'); ?></span><span class="hint"><?php echo esc_html__('Placeholder (teinte chaude)', 'a11y-widget'); ?></span></div>
-            <label class="a11y-switch">
-              <input type="checkbox" data-feature="lumiere-bleue" aria-label="<?php echo esc_attr__('Réduire la lumière bleue', 'a11y-widget'); ?>" />
-              <span class="track"></span><span class="thumb"></span>
-            </label>
-          </article>
-        </div>
-      </section>
-
-      <section class="a11y-section" aria-labelledby="a11y-section-gesture">
-        <h3 id="a11y-section-gesture"><?php echo esc_html__('Précision de geste', 'a11y-widget'); ?></h3>
-        <div class="a11y-grid">
-          <article class="a11y-card">
-            <div class="meta"><span class="label"><?php echo esc_html__('Grands boutons', 'a11y-widget'); ?></span><span class="hint"><?php echo esc_html__('Placeholder (hit areas)', 'a11y-widget'); ?></span></div>
-            <label class="a11y-switch">
-              <input type="checkbox" data-feature="grands-boutons" aria-label="<?php echo esc_attr__('Activer les grands boutons', 'a11y-widget'); ?>" />
-              <span class="track"></span><span class="thumb"></span>
-            </label>
-          </article>
-
-          <article class="a11y-card">
-            <div class="meta"><span class="label"><?php echo esc_html__('Espacement des liens', 'a11y-widget'); ?></span><span class="hint"><?php echo esc_html__('Placeholder (espacement > 44px)', 'a11y-widget'); ?></span></div>
-            <label class="a11y-switch">
-              <input type="checkbox" data-feature="espacement-liens" aria-label="<?php echo esc_attr__('Augmenter l’espacement des liens', 'a11y-widget'); ?>" />
-              <span class="track"></span><span class="thumb"></span>
-            </label>
-          </article>
-        </div>
-      </section>
-
-      <section class="a11y-section" aria-labelledby="a11y-section-color">
-        <h3 id="a11y-section-color"><?php echo esc_html__('Daltonismes (exemples)', 'a11y-widget'); ?></h3>
-        <div class="a11y-grid">
-          <article class="a11y-card">
-            <div class="meta"><span class="label"><?php echo esc_html__('Protanopie', 'a11y-widget'); ?></span><span class="hint"><?php echo esc_html__('Placeholder (palette adaptée)', 'a11y-widget'); ?></span></div>
-            <label class="a11y-switch">
-              <input type="checkbox" data-feature="protanopie" aria-label="<?php echo esc_attr__('Activer le profil protanopie', 'a11y-widget'); ?>" />
-              <span class="track"></span><span class="thumb"></span>
-            </label>
-          </article>
-          <article class="a11y-card">
-            <div class="meta"><span class="label"><?php echo esc_html__('Deutéranopie', 'a11y-widget'); ?></span><span class="hint"><?php echo esc_html__('Placeholder', 'a11y-widget'); ?></span></div>
-            <label class="a11y-switch">
-              <input type="checkbox" data-feature="deuteranopie" aria-label="<?php echo esc_attr__('Activer le profil deutéranopie', 'a11y-widget'); ?>" />
-              <span class="track"></span><span class="thumb"></span>
-            </label>
-          </article>
-        </div>
-      </section>
+      <?php $sections = a11y_widget_get_sections(); ?>
+      <?php if ( ! empty( $sections ) ) : ?>
+      <?php foreach ( $sections as $section ) : ?>
+        <?php
+        $section_id    = ! empty( $section['id'] ) ? sanitize_title( $section['id'] ) : sanitize_title( uniqid( 'a11y-sec-', true ) );
+        $section_title = isset( $section['title'] ) ? $section['title'] : '';
+        $features      = isset( $section['features'] ) ? (array) $section['features'] : array();
+        ?>
+        <section class="a11y-section" aria-labelledby="a11y-section-<?php echo esc_attr( $section_id ); ?>">
+          <h3 id="a11y-section-<?php echo esc_attr( $section_id ); ?>"><?php echo esc_html( $section_title ); ?></h3>
+          <?php if ( ! empty( $features ) ) : ?>
+            <div class="a11y-grid">
+              <?php foreach ( $features as $feature ) :
+                $slug       = isset( $feature['slug'] ) ? $feature['slug'] : '';
+                $label      = isset( $feature['label'] ) ? $feature['label'] : '';
+                $hint       = isset( $feature['hint'] ) ? $feature['hint'] : '';
+                $aria_label = isset( $feature['aria_label'] ) ? $feature['aria_label'] : $label;
+                if ( '' === $slug || '' === $label ) {
+                    continue;
+                }
+                ?>
+                <article class="a11y-card">
+                  <div class="meta"><span class="label"><?php echo esc_html( $label ); ?></span><?php if ( '' !== $hint ) : ?><span class="hint"><?php echo esc_html( $hint ); ?></span><?php endif; ?></div>
+                  <label class="a11y-switch">
+                    <input type="checkbox" data-feature="<?php echo esc_attr( $slug ); ?>" aria-label="<?php echo esc_attr( $aria_label ); ?>" />
+                    <span class="track"></span><span class="thumb"></span>
+                  </label>
+                </article>
+              <?php endforeach; ?>
+            </div>
+          <?php else : ?>
+            <p class="a11y-empty"><?php echo esc_html__( 'Aucune fonctionnalité disponible pour le moment.', 'a11y-widget' ); ?></p>
+          <?php endif; ?>
+        </section>
+      <?php endforeach; ?>
+      <?php else : ?>
+        <p class="a11y-empty"><?php echo esc_html__( 'Aucune fonctionnalité disponible pour le moment.', 'a11y-widget' ); ?></p>
+      <?php endif; ?>
     </div>
 
     <footer class="a11y-footer">
