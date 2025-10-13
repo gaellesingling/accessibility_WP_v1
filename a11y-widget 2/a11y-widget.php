@@ -60,24 +60,66 @@ function a11y_widget_markup() {
 }
 
 /**
- * Default widget sections/features definition.
+ * Default widget sections definition (hierarchical: level 1 categories + level 2 placeholders).
  *
  * @return array[]
  */
 function a11y_widget_get_default_sections() {
     return array(
         array(
-            'id'       => 'cog',
-            'title'    => __( 'Besoins cognitifs', 'a11y-widget' ),
-            'features' => array(
+            'slug'     => 'vision',
+            'title'    => __( 'Vision', 'a11y-widget' ),
+            'children' => array(
                 array(
-                    'slug'       => 'dyslexie',
+                    'slug'       => 'vision-texte-plus-grand',
+                    'label'      => __( 'Texte plus grand', 'a11y-widget' ),
+                    'hint'       => __( 'Ex : +15% / +30%', 'a11y-widget' ),
+                    'aria_label' => __( 'Augmenter la taille du texte', 'a11y-widget' ),
+                ),
+                array(
+                    'slug'       => 'vision-contraste',
+                    'label'      => __( 'Contraste renforcé', 'a11y-widget' ),
+                    'hint'       => __( 'Placeholder (high contrast)', 'a11y-widget' ),
+                    'aria_label' => __( 'Activer le contraste renforcé', 'a11y-widget' ),
+                ),
+                array(
+                    'slug'       => 'vision-mode-nuit',
+                    'label'      => __( 'Mode nuit', 'a11y-widget' ),
+                    'hint'       => __( 'Placeholder (thème sombre)', 'a11y-widget' ),
+                    'aria_label' => __( 'Activer le mode nuit', 'a11y-widget' ),
+                ),
+                array(
+                    'slug'       => 'vision-lumiere-bleue',
+                    'label'      => __( 'Réduire la lumière bleue', 'a11y-widget' ),
+                    'hint'       => __( 'Placeholder (teinte chaude)', 'a11y-widget' ),
+                    'aria_label' => __( 'Réduire la lumière bleue', 'a11y-widget' ),
+                ),
+                array(
+                    'slug'       => 'vision-protanopie',
+                    'label'      => __( 'Profil protanopie', 'a11y-widget' ),
+                    'hint'       => __( 'Placeholder (palette adaptée)', 'a11y-widget' ),
+                    'aria_label' => __( 'Activer le profil protanopie', 'a11y-widget' ),
+                ),
+                array(
+                    'slug'       => 'vision-deuteranopie',
+                    'label'      => __( 'Profil deutéranopie', 'a11y-widget' ),
+                    'hint'       => __( 'Placeholder', 'a11y-widget' ),
+                    'aria_label' => __( 'Activer le profil deutéranopie', 'a11y-widget' ),
+                ),
+            ),
+        ),
+        array(
+            'slug'     => 'cognitif',
+            'title'    => __( 'Cognitif', 'a11y-widget' ),
+            'children' => array(
+                array(
+                    'slug'       => 'cognitif-dyslexie',
                     'label'      => __( 'Dyslexie', 'a11y-widget' ),
                     'hint'       => __( 'Placez votre police/espacement', 'a11y-widget' ),
                     'aria_label' => __( 'Activer le profil dyslexie', 'a11y-widget' ),
                 ),
                 array(
-                    'slug'       => 'lecture',
+                    'slug'       => 'cognitif-lecture',
                     'label'      => __( 'Lecture facilitée', 'a11y-widget' ),
                     'hint'       => __( 'Ex : guide de lecture, surlignage', 'a11y-widget' ),
                     'aria_label' => __( 'Activer la lecture facilitée', 'a11y-widget' ),
@@ -85,47 +127,17 @@ function a11y_widget_get_default_sections() {
             ),
         ),
         array(
-            'id'       => 'visuel',
-            'title'    => __( 'Besoins visuels', 'a11y-widget' ),
-            'features' => array(
+            'slug'     => 'moteur',
+            'title'    => __( 'Moteur', 'a11y-widget' ),
+            'children' => array(
                 array(
-                    'slug'       => 'texte-plus-grand',
-                    'label'      => __( 'Texte plus grand', 'a11y-widget' ),
-                    'hint'       => __( 'Ex : +15% / +30%', 'a11y-widget' ),
-                    'aria_label' => __( 'Augmenter la taille du texte', 'a11y-widget' ),
-                ),
-                array(
-                    'slug'       => 'contraste',
-                    'label'      => __( 'Contraste renforcé', 'a11y-widget' ),
-                    'hint'       => __( 'Placeholder (high contrast)', 'a11y-widget' ),
-                    'aria_label' => __( 'Activer le contraste renforcé', 'a11y-widget' ),
-                ),
-                array(
-                    'slug'       => 'mode-nuit',
-                    'label'      => __( 'Mode nuit', 'a11y-widget' ),
-                    'hint'       => __( 'Placeholder (thème sombre)', 'a11y-widget' ),
-                    'aria_label' => __( 'Activer le mode nuit', 'a11y-widget' ),
-                ),
-                array(
-                    'slug'       => 'lumiere-bleue',
-                    'label'      => __( 'Réduire la lumière bleue', 'a11y-widget' ),
-                    'hint'       => __( 'Placeholder (teinte chaude)', 'a11y-widget' ),
-                    'aria_label' => __( 'Réduire la lumière bleue', 'a11y-widget' ),
-                ),
-            ),
-        ),
-        array(
-            'id'       => 'gesture',
-            'title'    => __( 'Précision de geste', 'a11y-widget' ),
-            'features' => array(
-                array(
-                    'slug'       => 'grands-boutons',
+                    'slug'       => 'moteur-grands-boutons',
                     'label'      => __( 'Grands boutons', 'a11y-widget' ),
                     'hint'       => __( 'Placeholder (hit areas)', 'a11y-widget' ),
                     'aria_label' => __( 'Activer les grands boutons', 'a11y-widget' ),
                 ),
                 array(
-                    'slug'       => 'espacement-liens',
+                    'slug'       => 'moteur-espacement-liens',
                     'label'      => __( 'Espacement des liens', 'a11y-widget' ),
                     'hint'       => __( 'Placeholder (espacement > 44px)', 'a11y-widget' ),
                     'aria_label' => __( 'Augmenter l’espacement des liens', 'a11y-widget' ),
@@ -133,20 +145,38 @@ function a11y_widget_get_default_sections() {
             ),
         ),
         array(
-            'id'       => 'color',
-            'title'    => __( 'Daltonismes (exemples)', 'a11y-widget' ),
-            'features' => array(
+            'slug'     => 'epilepsie',
+            'title'    => __( 'Épilepsie', 'a11y-widget' ),
+            'children' => array(
                 array(
-                    'slug'       => 'protanopie',
-                    'label'      => __( 'Protanopie', 'a11y-widget' ),
-                    'hint'       => __( 'Placeholder (palette adaptée)', 'a11y-widget' ),
-                    'aria_label' => __( 'Activer le profil protanopie', 'a11y-widget' ),
+                    'slug'       => 'epilepsie-reduire-animations',
+                    'label'      => __( 'Réduire les animations', 'a11y-widget' ),
+                    'hint'       => __( 'Placeholder (désactiver les effets rapides)', 'a11y-widget' ),
+                    'aria_label' => __( 'Réduire les animations pour limiter le risque de crises', 'a11y-widget' ),
                 ),
                 array(
-                    'slug'       => 'deuteranopie',
-                    'label'      => __( 'Deutéranopie', 'a11y-widget' ),
-                    'hint'       => __( 'Placeholder', 'a11y-widget' ),
-                    'aria_label' => __( 'Activer le profil deutéranopie', 'a11y-widget' ),
+                    'slug'       => 'epilepsie-avertissement-clignotement',
+                    'label'      => __( 'Avertissement clignotements', 'a11y-widget' ),
+                    'hint'       => __( 'Placeholder (alerte avant contenu clignotant)', 'a11y-widget' ),
+                    'aria_label' => __( 'Activer un avertissement avant les clignotements', 'a11y-widget' ),
+                ),
+            ),
+        ),
+        array(
+            'slug'     => 'audition',
+            'title'    => __( 'Audition', 'a11y-widget' ),
+            'children' => array(
+                array(
+                    'slug'       => 'audition-sous-titres',
+                    'label'      => __( 'Sous-titres', 'a11y-widget' ),
+                    'hint'       => __( 'Placeholder (activer les sous-titres / captions)', 'a11y-widget' ),
+                    'aria_label' => __( 'Activer les sous-titres', 'a11y-widget' ),
+                ),
+                array(
+                    'slug'       => 'audition-transcriptions',
+                    'label'      => __( 'Transcriptions', 'a11y-widget' ),
+                    'hint'       => __( 'Placeholder (proposer une transcription audio)', 'a11y-widget' ),
+                    'aria_label' => __( 'Afficher la transcription audio', 'a11y-widget' ),
                 ),
             ),
         ),
@@ -157,8 +187,8 @@ function a11y_widget_get_default_sections() {
  * Parse Markdown feature files located in the plugin `features/` directory.
  *
  * File format (per line, bullet list):
- *   # Mon titre de section
- *   - `slug` **Label** : Hint optionnel
+ *   # Mon titre de section (catégorie niveau 1)
+ *   - `slug` **Label** : Hint optionnel (placeholders niveau 2)
  *
  * @return array[] Parsed sections.
  */
@@ -180,7 +210,10 @@ function a11y_widget_parse_markdown_sections() {
         return array();
     }
 
-    $sections = array();
+    sort( $files );
+
+    $sections      = array();
+    $section_order = array();
 
     foreach ( $files as $file ) {
         $lines = file( $file, FILE_IGNORE_NEW_LINES );
@@ -188,7 +221,7 @@ function a11y_widget_parse_markdown_sections() {
             continue;
         }
 
-        $current_index = null;
+        $current_section = null;
 
         foreach ( $lines as $raw_line ) {
             $line = trim( $raw_line );
@@ -203,23 +236,38 @@ function a11y_widget_parse_markdown_sections() {
                     continue;
                 }
 
-                $sections[] = array(
-                    'id'       => sanitize_title( $title ),
-                    'title'    => $title,
-                    'features' => array(),
-                    'source'   => basename( $file ),
-                );
-                $current_index = count( $sections ) - 1;
+                $slug = sanitize_title( $title );
+                if ( '' === $slug ) {
+                    $current_section = null;
+                    continue;
+                }
+
+                if ( ! isset( $sections[ $slug ] ) ) {
+                    $sections[ $slug ] = array(
+                        'slug'     => $slug,
+                        'title'    => $title,
+                        'children' => array(),
+                    );
+                    $section_order[] = $slug;
+                } elseif ( '' === $sections[ $slug ]['title'] ) {
+                    $sections[ $slug ]['title'] = $title;
+                }
+
+                $current_section = $slug;
                 continue;
             }
 
-            if ( 0 !== strpos( $line, '-' ) || null === $current_index ) {
+            if ( 0 !== strpos( $line, '-' ) || null === $current_section ) {
                 continue;
             }
 
             if ( preg_match( '/-\s*`([^`]+)`\s*(?:\*\*(.+?)\*\*|([^:]+))?\s*(?::\s*(.+))?$/u', $line, $matches ) ) {
                 $slug = sanitize_key( $matches[1] );
                 if ( '' === $slug ) {
+                    continue;
+                }
+
+                if ( isset( $sections[ $current_section ]['children'][ $slug ] ) ) {
                     continue;
                 }
 
@@ -241,7 +289,7 @@ function a11y_widget_parse_markdown_sections() {
                     $hint = wp_strip_all_tags( trim( $matches[4] ) );
                 }
 
-                $sections[ $current_index ]['features'][] = array(
+                $sections[ $current_section ]['children'][ $slug ] = array(
                     'slug'       => $slug,
                     'label'      => $raw_label,
                     'hint'       => $hint,
@@ -252,7 +300,23 @@ function a11y_widget_parse_markdown_sections() {
         }
     }
 
-    $cache = $sections;
+    $ordered_sections = array();
+    foreach ( $section_order as $slug ) {
+        if ( ! isset( $sections[ $slug ] ) ) {
+            continue;
+        }
+
+        $section = $sections[ $slug ];
+        if ( ! empty( $section['children'] ) ) {
+            $section['children'] = array_values( $section['children'] );
+        } else {
+            $section['children'] = array();
+        }
+
+        $ordered_sections[] = $section;
+    }
+
+    $cache = $ordered_sections;
 
     return $cache;
 }
@@ -263,51 +327,110 @@ function a11y_widget_parse_markdown_sections() {
  * @return array[]
  */
 function a11y_widget_get_sections() {
-    $sections       = a11y_widget_get_default_sections();
-    $existing_slugs = array();
+    $defaults          = a11y_widget_get_default_sections();
+    $sections_by_slug  = array();
+    $ordered_slugs     = array();
+    $child_slug_global = array();
 
-    foreach ( $sections as $section ) {
-        if ( empty( $section['features'] ) ) {
+    foreach ( $defaults as $section ) {
+        if ( empty( $section['slug'] ) ) {
             continue;
         }
 
-        foreach ( $section['features'] as $feature ) {
-            if ( empty( $feature['slug'] ) ) {
+        $slug = sanitize_title( $section['slug'] );
+        if ( '' === $slug ) {
+            continue;
+        }
+
+        $section['slug'] = $slug;
+
+        if ( ! isset( $section['children'] ) || ! is_array( $section['children'] ) ) {
+            $section['children'] = array();
+        }
+
+        $sections_by_slug[ $slug ] = $section;
+        $ordered_slugs[]           = $slug;
+
+        foreach ( $section['children'] as $child ) {
+            if ( empty( $child['slug'] ) ) {
                 continue;
             }
 
-            $existing_slugs[ $feature['slug'] ] = true;
+            $child_slug_global[ $child['slug'] ] = true;
         }
     }
 
     $extra_sections = a11y_widget_parse_markdown_sections();
 
     foreach ( $extra_sections as $section ) {
-        if ( empty( $section['features'] ) ) {
+        if ( empty( $section['slug'] ) ) {
             continue;
         }
 
-        $section_features = array();
+        $slug = sanitize_title( $section['slug'] );
+        if ( '' === $slug ) {
+            continue;
+        }
 
-        foreach ( $section['features'] as $feature ) {
-            if ( empty( $feature['slug'] ) || isset( $existing_slugs[ $feature['slug'] ] ) ) {
+        if ( ! isset( $sections_by_slug[ $slug ] ) ) {
+            $sections_by_slug[ $slug ] = array(
+                'slug'     => $slug,
+                'title'    => isset( $section['title'] ) ? $section['title'] : '',
+                'children' => array(),
+            );
+            $ordered_slugs[] = $slug;
+        } elseif ( '' !== $section['title'] ) {
+            $sections_by_slug[ $slug ]['title'] = $sections_by_slug[ $slug ]['title'] ? $sections_by_slug[ $slug ]['title'] : $section['title'];
+        }
+
+        if ( empty( $section['children'] ) ) {
+            continue;
+        }
+
+        if ( ! isset( $sections_by_slug[ $slug ]['children'] ) || ! is_array( $sections_by_slug[ $slug ]['children'] ) ) {
+            $sections_by_slug[ $slug ]['children'] = array();
+        }
+
+        foreach ( $section['children'] as $child ) {
+            if ( empty( $child['slug'] ) ) {
                 continue;
             }
 
-            $existing_slugs[ $feature['slug'] ] = true;
-            $section_features[]                 = $feature;
+            if ( isset( $child_slug_global[ $child['slug'] ] ) ) {
+                continue;
+            }
+
+            $child_slug_global[ $child['slug'] ] = true;
+            $sections_by_slug[ $slug ]['children'][] = $child;
+        }
+    }
+
+    $sections = array();
+    foreach ( $ordered_slugs as $slug ) {
+        if ( ! isset( $sections_by_slug[ $slug ] ) ) {
+            continue;
         }
 
-        if ( ! empty( $section_features ) ) {
-            $section['features'] = $section_features;
-            $sections[]          = $section;
+        $section = $sections_by_slug[ $slug ];
+        if ( ! isset( $section['title'] ) ) {
+            $section['title'] = ''; // ensure key exists for template.
         }
+
+        if ( ! isset( $section['children'] ) || ! is_array( $section['children'] ) ) {
+            $section['children'] = array();
+        }
+
+        if ( ! empty( $section['children'] ) ) {
+            $section['children'] = array_values( $section['children'] );
+        }
+
+        $sections[] = $section;
     }
 
     /**
      * Filter the final list of sections sent to the template.
      *
-     * @param array $sections Sections with features.
+     * @param array $sections Sections with children.
      */
     return apply_filters( 'a11y_widget_sections', $sections );
 }
