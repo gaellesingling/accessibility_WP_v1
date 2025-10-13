@@ -31,7 +31,35 @@
   const closeBtn2 = document.getElementById('a11y-close2');
   const resetBtn = document.getElementById('a11y-reset');
 
-  const featureInputs = Array.from(document.querySelectorAll('[data-feature]'));
+  const tablist = document.querySelector('[data-role="section-tablist"]');
+  const tabs = tablist ? Array.from(tablist.querySelectorAll('[data-role="section-tab"]')) : [];
+  const panel = document.querySelector('[data-role="section-panel"]');
+  const featureGrid = panel ? panel.querySelector('[data-role="feature-grid"]') : null;
+  const featureEmpty = panel ? panel.querySelector('[data-role="feature-empty"]') : null;
+  const featureTemplate = document.querySelector('[data-role="feature-placeholder-template"]');
+  const featureDataScript = document.querySelector('[data-role="feature-data"]');
+
+  const sectionsData = (() => {
+    if(!featureDataScript){ return []; }
+    try {
+      const raw = (featureDataScript.textContent || '[]').trim();
+      const parsed = JSON.parse(raw || '[]');
+      return Array.isArray(parsed) ? parsed : [];
+    } catch(err){
+      return [];
+    }
+  })();
+
+  const sectionsById = new Map();
+  sectionsData.forEach(section => {
+    if(section && typeof section.id === 'string' && section.id){
+      sectionsById.set(section.id, section);
+    }
+  });
+
+  const featureInputs = new Map();
+  let featureState = loadStoredState();
+  let activeSectionId = null;
 
   let launcherLastPos = null;
   let hasCustomLauncherPosition = false;
@@ -197,6 +225,160 @@
     endDragging();
   }
 
+  // ---------- Section navigation ----------
+  function clearFeatureGrid(){
+    if(!featureGrid) return;
+    const inputs = featureGrid.querySelectorAll('[data-role="feature-input"]');
+    inputs.forEach(input => {
+      const key = input.dataset.feature;
+      if(key){ featureInputs.delete(key); }
+    });
+    featureGrid.innerHTML = '';
+  }
+
+  function registerFeatureInput(key, input){
+    if(!key || !input) return;
+    if(featureInputs.has(key) && featureInputs.get(key) !== input){
+      featureInputs.delete(key);
+    }
+    featureInputs.set(key, input);
+    const stored = Object.prototype.hasOwnProperty.call(featureState, key) ? !!featureState[key] : false;
+    input.checked = stored;
+    input.addEventListener('change', () => toggleFeature(key, input.checked));
+  }
+
+  function createFeaturePlaceholder(feature){
+    if(!featureTemplate || !featureTemplate.content){ return null; }
+    const fragment = featureTemplate.content.cloneNode(true);
+    const labelEl = fragment.querySelector('[data-role="feature-label"]');
+    if(labelEl){ labelEl.textContent = feature.label || ''; }
+    const hintEl = fragment.querySelector('[data-role="feature-hint"]');
+    if(hintEl){
+      if(feature.hint){
+        hintEl.textContent = feature.hint;
+        hintEl.hidden = false;
+      } else {
+        hintEl.textContent = '';
+        hintEl.hidden = true;
+      }
+    }
+    const inputEl = fragment.querySelector('[data-role="feature-input"]');
+    if(inputEl){
+      const slug = typeof feature.slug === 'string' ? feature.slug : '';
+      inputEl.dataset.feature = slug;
+      const aria = feature.aria_label || feature.label || '';
+      if(aria){ inputEl.setAttribute('aria-label', aria); }
+      registerFeatureInput(slug, inputEl);
+    }
+    return fragment;
+  }
+
+  function renderSection(sectionId){
+    if(!featureGrid){ return; }
+    clearFeatureGrid();
+    if(panel){ panel.setAttribute('data-active-section', sectionId || ''); }
+    const section = sectionId ? sectionsById.get(sectionId) : null;
+    const features = section && Array.isArray(section.features) ? section.features : [];
+    if(!features.length){
+      if(featureEmpty){ featureEmpty.hidden = false; }
+      return;
+    }
+    const fragment = document.createDocumentFragment();
+    let renderedCount = 0;
+    features.forEach(feature => {
+      if(!feature || typeof feature.slug !== 'string' || !feature.slug || typeof feature.label !== 'string' || !feature.label){
+        return;
+      }
+      const instance = createFeaturePlaceholder(feature);
+      if(instance){
+        fragment.appendChild(instance);
+        renderedCount++;
+      }
+    });
+    if(renderedCount){
+      if(featureEmpty){ featureEmpty.hidden = true; }
+      featureGrid.appendChild(fragment);
+    } else if(featureEmpty){
+      featureEmpty.hidden = false;
+    }
+  }
+
+  function focusTab(tab){
+    if(tab && tab.focus){ tab.focus(); }
+  }
+
+  function setActiveTab(tab, opts={}){
+    if(!tab){ return; }
+    const sectionId = tab.dataset.sectionId || '';
+    const changed = sectionId !== activeSectionId;
+    activeSectionId = sectionId;
+    tabs.forEach(item => {
+      const isActive = item === tab;
+      item.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      item.setAttribute('tabindex', isActive ? '0' : '-1');
+      item.classList.toggle('is-active', isActive);
+    });
+    if(panel){
+      if(tab.id){ panel.setAttribute('aria-labelledby', tab.id); }
+      else { panel.removeAttribute('aria-labelledby'); }
+    }
+    if(opts.focus){ focusTab(tab); }
+    if(changed || !featureGrid || !featureGrid.children.length){
+      renderSection(sectionId);
+    }
+  }
+
+  function getNextTab(current, delta){
+    if(!tabs.length){ return null; }
+    const index = tabs.indexOf(current);
+    if(index === -1){ return tabs[0]; }
+    const nextIndex = (index + delta + tabs.length) % tabs.length;
+    return tabs[nextIndex];
+  }
+
+  function handleTabKeydown(event, tab){
+    if(!tab){ return; }
+    let target = null;
+    switch(event.key){
+      case 'ArrowRight':
+      case 'ArrowDown':
+        event.preventDefault();
+        target = getNextTab(tab, 1);
+        break;
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        event.preventDefault();
+        target = getNextTab(tab, -1);
+        break;
+      case 'Home':
+        event.preventDefault();
+        target = tabs[0];
+        break;
+      case 'End':
+        event.preventDefault();
+        target = tabs[tabs.length - 1];
+        break;
+      default:
+        return;
+    }
+    if(target){ setActiveTab(target, { focus: true }); }
+  }
+
+  function setupSectionNavigation(){
+    if(!tabs.length || !panel){
+      if(featureEmpty){ featureEmpty.hidden = false; }
+      return;
+    }
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => setActiveTab(tab));
+      tab.addEventListener('keydown', event => handleTabKeydown(event, tab));
+    });
+    const initiallySelected = tabs.find(tab => tab.getAttribute('aria-selected') === 'true') || tabs[0];
+    if(initiallySelected){
+      setActiveTab(initiallySelected);
+    }
+  }
+
   // ---------- Focus trap ----------
   let lastFocused = null;
   function openPanel(){
@@ -228,21 +410,27 @@
   }
 
   // ---------- Persistance ----------
-  function persist(){
-    const data = {};
-    featureInputs.forEach(input => { data[input.dataset.feature] = input.checked; });
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(err){ /* ignore */ }
-  }
-  function restore(){
+  function loadStoredState(){
     try {
-      const raw = localStorage.getItem(STORAGE_KEY); if(!raw) return;
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw){ return {}; }
       const data = JSON.parse(raw);
-      for(const key in data){
-        const val = !!data[key];
-        const input = featureInputs.find(i=>i.dataset.feature===key);
-        if(input){ input.checked = val; toggleFeature(key, val, {silent:true}); }
+      return data && typeof data === 'object' ? data : {};
+    } catch(err){
+      return {};
+    }
+  }
+
+  function persist(){
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(featureState)); } catch(err){ /* ignore */ }
+  }
+
+  function applyStoredState(){
+    for(const key in featureState){
+      if(Object.prototype.hasOwnProperty.call(featureState, key)){
+        toggleFeature(key, !!featureState[key], { silent: true });
       }
-    } catch(err){ /* ignore */ }
+    }
   }
 
   // ---------- Core toggle ----------
@@ -257,10 +445,26 @@
     const set = listeners.get(key);
     if(set) for(const fn of set) try { fn(on, key); } catch(e){}
 
+    if(on){
+      featureState[key] = true;
+    } else {
+      delete featureState[key];
+    }
+
+    if(opts.syncInput !== false){
+      const input = featureInputs.get(key);
+      if(input && input.checked !== on){
+        input.checked = on;
+      }
+    }
+
     if(!opts.silent) persist();
   }
 
   // ---------- Wiring ----------
+  applyStoredState();
+  setupSectionNavigation();
+
   if(btn){
     btn.addEventListener('click', (e)=>{
       if(skipNextClick){
@@ -291,7 +495,10 @@
   if(closeBtn2){ closeBtn2.addEventListener('click', closePanel); }
   if(resetBtn){
     resetBtn.addEventListener('click', ()=>{
-      featureInputs.forEach(i=>{ i.checked = false; toggleFeature(i.dataset.feature, false); });
+      const keys = new Set([...featureInputs.keys(), ...Object.keys(featureState)]);
+      keys.forEach(key => toggleFeature(key, false));
+      featureInputs.forEach(input => { input.checked = false; });
+      featureState = {};
       try { localStorage.removeItem(STORAGE_KEY); } catch(err){}
       try { localStorage.removeItem(LAUNCHER_POS_KEY); } catch(err){}
       document.documentElement.style.removeProperty('--a11y-launcher-x');
@@ -300,11 +507,6 @@
       hasCustomLauncherPosition = false;
     });
   }
-  featureInputs.forEach(input => {
-    input.addEventListener('change', () => toggleFeature(input.dataset.feature, input.checked));
-  });
-
-  restore();
   restoreLauncherPosition();
   if(btn){ window.addEventListener('resize', handleResize); }
 
