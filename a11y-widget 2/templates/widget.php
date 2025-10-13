@@ -24,15 +24,16 @@
       <?php if ( ! empty( $sections ) ) : ?>
       <?php foreach ( $sections as $section ) : ?>
         <?php
-        $section_id    = ! empty( $section['id'] ) ? sanitize_title( $section['id'] ) : sanitize_title( uniqid( 'a11y-sec-', true ) );
+        $section_slug  = ! empty( $section['slug'] ) ? sanitize_title( $section['slug'] ) : '';
+        $section_id    = $section_slug ? $section_slug : ( ! empty( $section['id'] ) ? sanitize_title( $section['id'] ) : sanitize_title( uniqid( 'a11y-sec-', true ) ) );
         $section_title = isset( $section['title'] ) ? $section['title'] : '';
-        $features      = isset( $section['features'] ) ? (array) $section['features'] : array();
+        $children      = isset( $section['children'] ) ? (array) $section['children'] : array();
         ?>
         <section class="a11y-section" aria-labelledby="a11y-section-<?php echo esc_attr( $section_id ); ?>">
           <h3 id="a11y-section-<?php echo esc_attr( $section_id ); ?>"><?php echo esc_html( $section_title ); ?></h3>
-          <?php if ( ! empty( $features ) ) : ?>
+          <?php if ( ! empty( $children ) ) : ?>
             <div class="a11y-grid">
-              <?php foreach ( $features as $feature ) :
+              <?php foreach ( $children as $feature ) :
                 $slug       = isset( $feature['slug'] ) ? $feature['slug'] : '';
                 $label      = isset( $feature['label'] ) ? $feature['label'] : '';
                 $hint       = isset( $feature['hint'] ) ? $feature['hint'] : '';
