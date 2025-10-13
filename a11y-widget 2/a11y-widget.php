@@ -71,40 +71,11 @@ function a11y_widget_get_default_sections() {
             'title'    => __( 'Vision', 'a11y-widget' ),
             'children' => array(
                 array(
-                    'slug'       => 'vision-texte-plus-grand',
-                    'label'      => __( 'Texte plus grand', 'a11y-widget' ),
-                    'hint'       => __( 'Ex : +15% / +30%', 'a11y-widget' ),
-                    'aria_label' => __( 'Augmenter la taille du texte', 'a11y-widget' ),
-                ),
-                array(
-                    'slug'       => 'vision-contraste',
-                    'label'      => __( 'Contraste renforcé', 'a11y-widget' ),
-                    'hint'       => __( 'Placeholder (high contrast)', 'a11y-widget' ),
-                    'aria_label' => __( 'Activer le contraste renforcé', 'a11y-widget' ),
-                ),
-                array(
-                    'slug'       => 'vision-mode-nuit',
-                    'label'      => __( 'Mode nuit', 'a11y-widget' ),
-                    'hint'       => __( 'Placeholder (thème sombre)', 'a11y-widget' ),
-                    'aria_label' => __( 'Activer le mode nuit', 'a11y-widget' ),
-                ),
-                array(
-                    'slug'       => 'vision-lumiere-bleue',
-                    'label'      => __( 'Réduire la lumière bleue', 'a11y-widget' ),
-                    'hint'       => __( 'Placeholder (teinte chaude)', 'a11y-widget' ),
-                    'aria_label' => __( 'Réduire la lumière bleue', 'a11y-widget' ),
-                ),
-                array(
-                    'slug'       => 'vision-protanopie',
-                    'label'      => __( 'Profil protanopie', 'a11y-widget' ),
-                    'hint'       => __( 'Placeholder (palette adaptée)', 'a11y-widget' ),
-                    'aria_label' => __( 'Activer le profil protanopie', 'a11y-widget' ),
-                ),
-                array(
-                    'slug'       => 'vision-deuteranopie',
-                    'label'      => __( 'Profil deutéranopie', 'a11y-widget' ),
-                    'hint'       => __( 'Placeholder', 'a11y-widget' ),
-                    'aria_label' => __( 'Activer le profil deutéranopie', 'a11y-widget' ),
+                    'slug'        => 'vision-placeholder',
+                    'label'       => __( 'Exemple : augmenter la lisibilité', 'a11y-widget' ),
+                    'hint'        => __( 'Ajoutez vos réglages pour la vision (contraste, taille du texte…).', 'a11y-widget' ),
+                    'aria_label'  => __( 'Exemple de réglage pour la vision', 'a11y-widget' ),
+                    'placeholder' => true,
                 ),
             ),
         ),
@@ -113,16 +84,11 @@ function a11y_widget_get_default_sections() {
             'title'    => __( 'Cognitif', 'a11y-widget' ),
             'children' => array(
                 array(
-                    'slug'       => 'cognitif-dyslexie',
-                    'label'      => __( 'Dyslexie', 'a11y-widget' ),
-                    'hint'       => __( 'Placez votre police/espacement', 'a11y-widget' ),
-                    'aria_label' => __( 'Activer le profil dyslexie', 'a11y-widget' ),
-                ),
-                array(
-                    'slug'       => 'cognitif-lecture',
-                    'label'      => __( 'Lecture facilitée', 'a11y-widget' ),
-                    'hint'       => __( 'Ex : guide de lecture, surlignage', 'a11y-widget' ),
-                    'aria_label' => __( 'Activer la lecture facilitée', 'a11y-widget' ),
+                    'slug'        => 'cognitif-placeholder',
+                    'label'       => __( 'Exemple : aide à la lecture', 'a11y-widget' ),
+                    'hint'        => __( 'Ajoutez vos outils pour le confort cognitif.', 'a11y-widget' ),
+                    'aria_label'  => __( 'Exemple de réglage cognitif', 'a11y-widget' ),
+                    'placeholder' => true,
                 ),
             ),
         ),
@@ -131,16 +97,11 @@ function a11y_widget_get_default_sections() {
             'title'    => __( 'Moteur', 'a11y-widget' ),
             'children' => array(
                 array(
-                    'slug'       => 'moteur-grands-boutons',
-                    'label'      => __( 'Grands boutons', 'a11y-widget' ),
-                    'hint'       => __( 'Placeholder (hit areas)', 'a11y-widget' ),
-                    'aria_label' => __( 'Activer les grands boutons', 'a11y-widget' ),
-                ),
-                array(
-                    'slug'       => 'moteur-espacement-liens',
-                    'label'      => __( 'Espacement des liens', 'a11y-widget' ),
-                    'hint'       => __( 'Placeholder (espacement > 44px)', 'a11y-widget' ),
-                    'aria_label' => __( 'Augmenter l’espacement des liens', 'a11y-widget' ),
+                    'slug'        => 'moteur-placeholder',
+                    'label'       => __( 'Exemple : zones cliquables agrandies', 'a11y-widget' ),
+                    'hint'        => __( 'Ajoutez vos options pour la navigation motrice.', 'a11y-widget' ),
+                    'aria_label'  => __( 'Exemple de réglage moteur', 'a11y-widget' ),
+                    'placeholder' => true,
                 ),
             ),
         ),
@@ -149,16 +110,11 @@ function a11y_widget_get_default_sections() {
             'title'    => __( 'Épilepsie', 'a11y-widget' ),
             'children' => array(
                 array(
-                    'slug'       => 'epilepsie-reduire-animations',
-                    'label'      => __( 'Réduire les animations', 'a11y-widget' ),
-                    'hint'       => __( 'Placeholder (désactiver les effets rapides)', 'a11y-widget' ),
-                    'aria_label' => __( 'Réduire les animations pour limiter le risque de crises', 'a11y-widget' ),
-                ),
-                array(
-                    'slug'       => 'epilepsie-avertissement-clignotement',
-                    'label'      => __( 'Avertissement clignotements', 'a11y-widget' ),
-                    'hint'       => __( 'Placeholder (alerte avant contenu clignotant)', 'a11y-widget' ),
-                    'aria_label' => __( 'Activer un avertissement avant les clignotements', 'a11y-widget' ),
+                    'slug'        => 'epilepsie-placeholder',
+                    'label'       => __( 'Exemple : réduire les animations', 'a11y-widget' ),
+                    'hint'        => __( 'Ajoutez vos outils pour limiter les stimuli visuels.', 'a11y-widget' ),
+                    'aria_label'  => __( 'Exemple de réglage pour l’épilepsie', 'a11y-widget' ),
+                    'placeholder' => true,
                 ),
             ),
         ),
@@ -167,16 +123,11 @@ function a11y_widget_get_default_sections() {
             'title'    => __( 'Audition', 'a11y-widget' ),
             'children' => array(
                 array(
-                    'slug'       => 'audition-sous-titres',
-                    'label'      => __( 'Sous-titres', 'a11y-widget' ),
-                    'hint'       => __( 'Placeholder (activer les sous-titres / captions)', 'a11y-widget' ),
-                    'aria_label' => __( 'Activer les sous-titres', 'a11y-widget' ),
-                ),
-                array(
-                    'slug'       => 'audition-transcriptions',
-                    'label'      => __( 'Transcriptions', 'a11y-widget' ),
-                    'hint'       => __( 'Placeholder (proposer une transcription audio)', 'a11y-widget' ),
-                    'aria_label' => __( 'Afficher la transcription audio', 'a11y-widget' ),
+                    'slug'        => 'audition-placeholder',
+                    'label'       => __( 'Exemple : activer les sous-titres', 'a11y-widget' ),
+                    'hint'        => __( 'Ajoutez vos options pour l’accessibilité audio.', 'a11y-widget' ),
+                    'aria_label'  => __( 'Exemple de réglage pour l’audition', 'a11y-widget' ),
+                    'placeholder' => true,
                 ),
             ),
         ),
@@ -244,9 +195,10 @@ function a11y_widget_parse_markdown_sections() {
 
                 if ( ! isset( $sections[ $slug ] ) ) {
                     $sections[ $slug ] = array(
-                        'slug'     => $slug,
-                        'title'    => $title,
-                        'children' => array(),
+                        'slug'           => $slug,
+                        'title'          => $title,
+                        'children'       => array(),
+                        'children_order' => array(),
                     );
                     $section_order[] = $slug;
                 } elseif ( '' === $sections[ $slug ]['title'] ) {
@@ -296,6 +248,7 @@ function a11y_widget_parse_markdown_sections() {
                     'aria_label' => sprintf( __( 'Activer %s', 'a11y-widget' ), $raw_label ),
                     'source'     => basename( $file ),
                 );
+                $sections[ $current_section ]['children_order'][] = $slug;
             }
         }
     }
@@ -307,11 +260,17 @@ function a11y_widget_parse_markdown_sections() {
         }
 
         $section = $sections[ $slug ];
-        if ( ! empty( $section['children'] ) ) {
-            $section['children'] = array_values( $section['children'] );
-        } else {
-            $section['children'] = array();
+        $ordered_children = array();
+        if ( ! empty( $section['children_order'] ) ) {
+            foreach ( $section['children_order'] as $child_slug ) {
+                if ( isset( $section['children'][ $child_slug ] ) ) {
+                    $ordered_children[] = $section['children'][ $child_slug ];
+                }
+            }
         }
+
+        $section['children'] = $ordered_children;
+        unset( $section['children_order'] );
 
         $ordered_sections[] = $section;
     }
@@ -342,21 +301,41 @@ function a11y_widget_get_sections() {
             continue;
         }
 
-        $section['slug'] = $slug;
-
-        if ( ! isset( $section['children'] ) || ! is_array( $section['children'] ) ) {
-            $section['children'] = array();
+        if ( ! isset( $sections_by_slug[ $slug ] ) ) {
+            $sections_by_slug[ $slug ] = array(
+                'slug'           => $slug,
+                'title'          => isset( $section['title'] ) ? $section['title'] : '',
+                'children'       => array(),
+                'children_order' => array(),
+            );
+            $ordered_slugs[] = $slug;
+        } elseif ( isset( $section['title'] ) && '' !== $section['title'] && '' === $sections_by_slug[ $slug ]['title'] ) {
+            $sections_by_slug[ $slug ]['title'] = $section['title'];
         }
 
-        $sections_by_slug[ $slug ] = $section;
-        $ordered_slugs[]           = $slug;
+        $children = array();
+        if ( isset( $section['children'] ) && is_array( $section['children'] ) ) {
+            $children = $section['children'];
+        }
 
-        foreach ( $section['children'] as $child ) {
+        foreach ( $children as $child ) {
             if ( empty( $child['slug'] ) ) {
                 continue;
             }
 
-            $child_slug_global[ $child['slug'] ] = true;
+            $child_slug = sanitize_key( $child['slug'] );
+            if ( '' === $child_slug ) {
+                continue;
+            }
+
+            if ( isset( $sections_by_slug[ $slug ]['children'][ $child_slug ] ) ) {
+                continue;
+            }
+
+            $child['slug'] = $child_slug;
+            $sections_by_slug[ $slug ]['children'][ $child_slug ] = $child;
+            $sections_by_slug[ $slug ]['children_order'][]        = $child_slug;
+            $child_slug_global[ $child_slug ]                     = true;
         }
     }
 
@@ -374,21 +353,18 @@ function a11y_widget_get_sections() {
 
         if ( ! isset( $sections_by_slug[ $slug ] ) ) {
             $sections_by_slug[ $slug ] = array(
-                'slug'     => $slug,
-                'title'    => isset( $section['title'] ) ? $section['title'] : '',
-                'children' => array(),
+                'slug'           => $slug,
+                'title'          => isset( $section['title'] ) ? $section['title'] : '',
+                'children'       => array(),
+                'children_order' => array(),
             );
             $ordered_slugs[] = $slug;
-        } elseif ( '' !== $section['title'] ) {
-            $sections_by_slug[ $slug ]['title'] = $sections_by_slug[ $slug ]['title'] ? $sections_by_slug[ $slug ]['title'] : $section['title'];
+        } elseif ( '' !== $section['title'] && '' === $sections_by_slug[ $slug ]['title'] ) {
+            $sections_by_slug[ $slug ]['title'] = $section['title'];
         }
 
         if ( empty( $section['children'] ) ) {
             continue;
-        }
-
-        if ( ! isset( $sections_by_slug[ $slug ]['children'] ) || ! is_array( $sections_by_slug[ $slug ]['children'] ) ) {
-            $sections_by_slug[ $slug ]['children'] = array();
         }
 
         foreach ( $section['children'] as $child ) {
@@ -396,12 +372,23 @@ function a11y_widget_get_sections() {
                 continue;
             }
 
-            if ( isset( $child_slug_global[ $child['slug'] ] ) ) {
+            $child_slug = sanitize_key( $child['slug'] );
+            if ( '' === $child_slug ) {
                 continue;
             }
 
-            $child_slug_global[ $child['slug'] ] = true;
-            $sections_by_slug[ $slug ]['children'][] = $child;
+            if ( isset( $child_slug_global[ $child_slug ] ) ) {
+                continue;
+            }
+
+            if ( isset( $sections_by_slug[ $slug ]['children'][ $child_slug ] ) ) {
+                continue;
+            }
+
+            $child['slug']                                   = $child_slug;
+            $child_slug_global[ $child_slug ]                = true;
+            $sections_by_slug[ $slug ]['children'][ $child_slug ] = $child;
+            $sections_by_slug[ $slug ]['children_order'][]        = $child_slug;
         }
     }
 
@@ -412,17 +399,21 @@ function a11y_widget_get_sections() {
         }
 
         $section = $sections_by_slug[ $slug ];
-        if ( ! isset( $section['title'] ) ) {
-            $section['title'] = ''; // ensure key exists for template.
+        if ( ! isset( $section['title'] ) || ! is_string( $section['title'] ) ) {
+            $section['title'] = '';
         }
 
-        if ( ! isset( $section['children'] ) || ! is_array( $section['children'] ) ) {
-            $section['children'] = array();
+        $ordered_children = array();
+        if ( isset( $section['children_order'] ) && is_array( $section['children_order'] ) ) {
+            foreach ( $section['children_order'] as $child_slug ) {
+                if ( isset( $section['children'][ $child_slug ] ) ) {
+                    $ordered_children[] = $section['children'][ $child_slug ];
+                }
+            }
         }
 
-        if ( ! empty( $section['children'] ) ) {
-            $section['children'] = array_values( $section['children'] );
-        }
+        $section['children'] = $ordered_children;
+        unset( $section['children_order'] );
 
         $sections[] = $section;
     }
