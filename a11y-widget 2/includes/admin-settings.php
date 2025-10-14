@@ -48,6 +48,15 @@ function a11y_widget_get_disabled_features_option_name() {
 }
 
 /**
+ * Option name helper for the "force all features" toggle.
+ *
+ * @return string
+ */
+function a11y_widget_get_force_all_features_option_name() {
+    return 'a11y_widget_force_all_features';
+}
+
+/**
  * Retrieve the list of disabled features stored in the database.
  *
  * @return string[]
@@ -60,6 +69,15 @@ function a11y_widget_get_disabled_features() {
     }
 
     return a11y_widget_normalize_feature_slugs( $stored );
+}
+
+/**
+ * Determine if all features should be displayed, regardless of customization.
+ *
+ * @return bool
+ */
+function a11y_widget_force_all_features_enabled() {
+    return (bool) get_option( a11y_widget_get_force_all_features_option_name(), true );
 }
 
 /**
@@ -78,6 +96,17 @@ function a11y_widget_sanitize_disabled_features( $input ) {
 }
 
 /**
+ * Sanitize the "force all features" option.
+ *
+ * @param mixed $input Raw input value.
+ *
+ * @return bool
+ */
+function a11y_widget_sanitize_force_all_features( $input ) {
+    return ! empty( $input );
+}
+
+/**
  * Register plugin settings used by the admin screen.
  */
 function a11y_widget_register_settings() {
@@ -88,6 +117,16 @@ function a11y_widget_register_settings() {
             'type'              => 'array',
             'sanitize_callback' => 'a11y_widget_sanitize_disabled_features',
             'default'           => array(),
+        )
+    );
+
+    register_setting(
+        'a11y_widget_settings',
+        a11y_widget_get_force_all_features_option_name(),
+        array(
+            'type'              => 'boolean',
+            'sanitize_callback' => 'a11y_widget_sanitize_force_all_features',
+            'default'           => true,
         )
     );
 }
@@ -136,9 +175,11 @@ function a11y_widget_render_admin_page() {
         return;
     }
 
-    $sections        = a11y_widget_get_sections();
-    $disabled        = a11y_widget_get_disabled_features();
-    $disabled_lookup = array_fill_keys( $disabled, true );
+    $sections             = a11y_widget_get_sections();
+    $disabled             = a11y_widget_get_disabled_features();
+    $disabled_lookup      = array_fill_keys( $disabled, true );
+    $force_all_features   = a11y_widget_force_all_features_enabled();
+    $force_all_option_key = a11y_widget_get_force_all_features_option_name();
     ?>
     <div class="wrap a11y-widget-admin">
         <h1><?php esc_html_e( 'Accessibilité RGAA', 'a11y-widget' ); ?></h1>
@@ -148,6 +189,24 @@ function a11y_widget_render_admin_page() {
 
         <form method="post" action="options.php">
             <?php settings_fields( 'a11y_widget_settings' ); ?>
+
+            <fieldset class="a11y-widget-admin-force-all">
+                <legend class="screen-reader-text"><?php esc_html_e( 'Affichage des fonctionnalités', 'a11y-widget' ); ?></legend>
+                <label for="a11y-widget-force-all">
+                    <input type="hidden" name="<?php echo esc_attr( $force_all_option_key ); ?>" value="0" />
+                    <input
+                        type="checkbox"
+                        id="a11y-widget-force-all"
+                        name="<?php echo esc_attr( $force_all_option_key ); ?>"
+                        value="1"
+                        <?php checked( $force_all_features ); ?>
+                    />
+                    <?php esc_html_e( 'Afficher toutes les fonctionnalités du widget', 'a11y-widget' ); ?>
+                </label>
+                <p class="description">
+                    <?php esc_html_e( 'Lorsque cette option est active, toutes les fonctionnalités sont affichées et la personnalisation ci-dessous est ignorée.', 'a11y-widget' ); ?>
+                </p>
+            </fieldset>
 
             <?php if ( empty( $sections ) ) : ?>
                 <p class="a11y-widget-admin-empty">
@@ -209,6 +268,7 @@ function a11y_widget_render_admin_page() {
                                                         name="<?php echo esc_attr( a11y_widget_get_disabled_features_option_name() ); ?>[]"
                                                         value="<?php echo esc_attr( $feature_slug ); ?>"
                                                         <?php checked( $is_disabled ); ?>
+                                                        <?php disabled( $force_all_features ); ?>
                                                     />
                                                     <span class="a11y-widget-switch__ui">
                                                         <span
@@ -242,6 +302,10 @@ function a11y_widget_render_admin_page() {
  * @return array
  */
 function a11y_widget_filter_disabled_features( $sections ) {
+    if ( a11y_widget_force_all_features_enabled() ) {
+        return $sections;
+    }
+
     $doing_ajax = false;
 
     if ( function_exists( 'wp_doing_ajax' ) ) {
