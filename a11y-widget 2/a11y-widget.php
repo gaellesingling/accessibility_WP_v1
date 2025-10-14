@@ -2,7 +2,7 @@
 /**
  * Plugin Name: A11y Widget – Module d’accessibilité (mini)
  * Description: Bouton flottant qui ouvre un module d’accessibilité avec placeholders (à brancher selon vos besoins). Shortcode: [a11y_widget]. 
- * Version: 1.1.0
+ * Version: 1.2.0
  * Author: ChatGPT
  * License: GPL-2.0-or-later
  * Text Domain: a11y-widget
@@ -10,7 +10,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'A11Y_WIDGET_VERSION', '1.1.0' );
+define( 'A11Y_WIDGET_VERSION', '1.2.0' );
 define( 'A11Y_WIDGET_URL', plugin_dir_url( __FILE__ ) );
 define( 'A11Y_WIDGET_PATH', plugin_dir_path( __FILE__ ) );
 
@@ -425,6 +425,9 @@ function a11y_widget_get_sections() {
      */
     return apply_filters( 'a11y_widget_sections', $sections );
 }
+
+// Load admin settings and feature visibility management.
+require_once A11Y_WIDGET_PATH . 'includes/admin-settings.php';
 
 /**
  * Auto-inject in footer unless disabled
