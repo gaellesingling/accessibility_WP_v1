@@ -36,24 +36,6 @@ if ( ! function_exists( 'a11y_widget_normalize_feature_slugs' ) ) {
 
         return array_keys( $normalized );
     }
-function a11y_widget_normalize_feature_slugs( $items ) {
-    if ( ! is_array( $items ) ) {
-        $items = array( $items );
-    }
-
-    $normalized = array();
-
-    foreach ( $items as $slug ) {
-        $slug = sanitize_key( $slug );
-
-        if ( '' === $slug ) {
-            continue;
-        }
-
-        $normalized[ $slug ] = true;
-    }
-
-    return array_keys( $normalized );
 }
 
 /**
@@ -269,7 +251,6 @@ function a11y_widget_filter_disabled_features( $sections ) {
     }
 
     if ( is_admin() && ! $doing_ajax ) {
-    if ( is_admin() && ! wp_doing_ajax() ) {
         return $sections;
     }
 
