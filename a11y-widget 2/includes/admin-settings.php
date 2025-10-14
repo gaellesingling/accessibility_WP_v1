@@ -36,6 +36,24 @@ if ( ! function_exists( 'a11y_widget_normalize_feature_slugs' ) ) {
 
         return array_keys( $normalized );
     }
+function a11y_widget_normalize_feature_slugs( $items ) {
+    if ( ! is_array( $items ) ) {
+        $items = array( $items );
+    }
+
+    $normalized = array();
+
+    foreach ( $items as $slug ) {
+        $slug = sanitize_key( $slug );
+
+        if ( '' === $slug ) {
+            continue;
+        }
+
+        $normalized[ $slug ] = true;
+    }
+
+    return array_keys( $normalized );
 }
 
 /**
@@ -149,13 +167,14 @@ function a11y_widget_render_admin_page() {
         <form method="post" action="options.php">
             <?php settings_fields( 'a11y_widget_settings' ); ?>
 
-            <?php if ( empty( $sections ) ) { ?>
+            <?php if ( empty( $sections ) ) : ?>
                 <p class="a11y-widget-admin-empty">
                     <?php esc_html_e( 'Aucune fonctionnalité n’est disponible pour le moment.', 'a11y-widget' ); ?>
                 </p>
-            <?php } else { ?>
+            <?php else : ?>
                 <div class="a11y-widget-admin-grid">
-                    <?php foreach ( $sections as $section ) {
+                    <?php
+                    foreach ( $sections as $section ) :
                         $section_title = isset( $section['title'] ) ? $section['title'] : '';
                         $section_slug  = isset( $section['slug'] ) ? sanitize_title( $section['slug'] ) : '';
                         $children      = isset( $section['children'] ) && is_array( $section['children'] ) ? $section['children'] : array();
@@ -164,12 +183,13 @@ function a11y_widget_render_admin_page() {
                             <legend class="a11y-widget-admin-section__title"><?php echo esc_html( $section_title ); ?></legend>
 
                             <div class="a11y-widget-admin-section__content">
-                                <?php if ( empty( $children ) ) { ?>
+                                <?php if ( empty( $children ) ) : ?>
                                     <p class="a11y-widget-admin-empty">
                                         <em><?php esc_html_e( 'Aucune fonctionnalité dans cette catégorie.', 'a11y-widget' ); ?></em>
                                     </p>
-                                <?php } else {
-                                    foreach ( $children as $feature ) {
+                                <?php else : ?>
+                                    <?php
+                                    foreach ( $children as $feature ) :
                                         $feature_slug  = isset( $feature['slug'] ) ? sanitize_key( $feature['slug'] ) : '';
                                         $feature_label = isset( $feature['label'] ) ? $feature['label'] : '';
                                         $feature_hint  = isset( $feature['hint'] ) ? $feature['hint'] : '';
@@ -185,9 +205,9 @@ function a11y_widget_render_admin_page() {
                                             <div class="a11y-widget-admin-feature__description">
                                                 <label for="<?php echo esc_attr( $input_id ); ?>">
                                                     <span class="a11y-widget-admin-feature__label"><?php echo esc_html( $feature_label ); ?></span>
-                                                    <?php if ( '' !== $feature_hint ) { ?>
+                                                    <?php if ( '' !== $feature_hint ) : ?>
                                                         <span class="description"><?php echo esc_html( $feature_hint ); ?></span>
-                                                    <?php } ?>
+                                                    <?php endif; ?>
                                                 </label>
                                             </div>
                                             <div class="a11y-widget-admin-toggle">
@@ -218,17 +238,13 @@ function a11y_widget_render_admin_page() {
                                                 </label>
                                             </div>
                                         </div>
-                                        <?php
-                                    }
-                                }
-                                ?>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             </div>
                         </fieldset>
-                        <?php
-                    }
-                    ?>
+                    <?php endforeach; ?>
                 </div>
-            <?php } ?>
+            <?php endif; ?>
 
             <?php submit_button( __( 'Enregistrer les modifications', 'a11y-widget' ) ); ?>
         </form>
@@ -253,6 +269,7 @@ function a11y_widget_filter_disabled_features( $sections ) {
     }
 
     if ( is_admin() && ! $doing_ajax ) {
+    if ( is_admin() && ! wp_doing_ajax() ) {
         return $sections;
     }
 
