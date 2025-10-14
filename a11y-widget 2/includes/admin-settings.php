@@ -240,15 +240,7 @@ function a11y_widget_render_admin_page() {
  * @return array
  */
 function a11y_widget_filter_disabled_features( $sections ) {
-    $doing_ajax = false;
-
-    if ( function_exists( 'wp_doing_ajax' ) ) {
-        $doing_ajax = wp_doing_ajax();
-    } elseif ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
-        $doing_ajax = true;
-    }
-
-    if ( is_admin() && ! $doing_ajax ) {
+    if ( is_admin() && ! wp_doing_ajax() ) {
         return $sections;
     }
 
