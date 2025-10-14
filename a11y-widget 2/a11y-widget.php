@@ -418,12 +418,123 @@ function a11y_widget_get_sections() {
         $sections[] = $section;
     }
 
+    $sections = a11y_widget_apply_custom_feature_layout( $sections );
+
     /**
      * Filter the final list of sections sent to the template.
      *
      * @param array $sections Sections with children.
      */
     return apply_filters( 'a11y_widget_sections', $sections );
+}
+
+/**
+ * Apply the administrator-defined feature layout to sections.
+ *
+ * @param array $sections Sections with their features.
+ *
+ * @return array
+ */
+function a11y_widget_apply_custom_feature_layout( $sections ) {
+    if ( empty( $sections ) || ! is_array( $sections ) ) {
+        return array();
+    }
+
+    if ( ! function_exists( 'a11y_widget_get_feature_layout' ) ) {
+        return $sections;
+    }
+
+    $layout = a11y_widget_get_feature_layout();
+
+    if ( empty( $layout ) || ! is_array( $layout ) ) {
+        return $sections;
+    }
+
+    $feature_map = array();
+
+    foreach ( $sections as $section ) {
+        if ( empty( $section['children'] ) || ! is_array( $section['children'] ) ) {
+            continue;
+        }
+
+        foreach ( $section['children'] as $feature ) {
+            if ( empty( $feature['slug'] ) ) {
+                continue;
+            }
+
+            $feature_slug = sanitize_key( $feature['slug'] );
+
+            if ( '' === $feature_slug ) {
+                continue;
+            }
+
+            $feature['slug']          = $feature_slug;
+            $feature_map[ $feature_slug ] = $feature;
+        }
+    }
+
+    if ( empty( $feature_map ) ) {
+        return $sections;
+    }
+
+    $assigned = array();
+
+    foreach ( $sections as &$section ) {
+        if ( empty( $section['slug'] ) ) {
+            continue;
+        }
+
+        $section_slug = sanitize_title( $section['slug'] );
+
+        if ( '' === $section_slug ) {
+            continue;
+        }
+
+        $ordered_children = array();
+
+        if ( isset( $layout[ $section_slug ] ) && is_array( $layout[ $section_slug ] ) ) {
+            foreach ( $layout[ $section_slug ] as $child_slug ) {
+                $child_slug = sanitize_key( $child_slug );
+
+                if ( '' === $child_slug ) {
+                    continue;
+                }
+
+                if ( isset( $assigned[ $child_slug ] ) || ! isset( $feature_map[ $child_slug ] ) ) {
+                    continue;
+                }
+
+                $feature = $feature_map[ $child_slug ];
+                $feature['slug'] = $child_slug;
+
+                $ordered_children[]      = $feature;
+                $assigned[ $child_slug ] = true;
+            }
+        }
+
+        if ( isset( $section['children'] ) && is_array( $section['children'] ) ) {
+            foreach ( $section['children'] as $feature ) {
+                if ( empty( $feature['slug'] ) ) {
+                    continue;
+                }
+
+                $child_slug = sanitize_key( $feature['slug'] );
+
+                if ( '' === $child_slug || isset( $assigned[ $child_slug ] ) || ! isset( $feature_map[ $child_slug ] ) ) {
+                    continue;
+                }
+
+                $feature['slug']         = $child_slug;
+                $ordered_children[]      = $feature;
+                $assigned[ $child_slug ] = true;
+            }
+        }
+
+        $section['children'] = $ordered_children;
+    }
+    unset( $section );
+
+    return $sections;
 }
 
 // Load admin settings and feature visibility management.
