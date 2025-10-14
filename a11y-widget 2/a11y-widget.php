@@ -426,6 +426,9 @@ function a11y_widget_get_sections() {
     return apply_filters( 'a11y_widget_sections', $sections );
 }
 
+// Load admin settings and feature visibility management.
+require_once A11Y_WIDGET_PATH . 'includes/admin-settings.php';
+
 /**
  * Normalize a list of feature slugs.
  *
