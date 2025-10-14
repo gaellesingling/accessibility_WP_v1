@@ -3,10 +3,14 @@ Contributors: chatgpt
 Tags: accessibility, a11y, widget
 Requires at least: 5.0
 Tested up to: 6.6
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 
 Un bouton flottant ouvre un module d’accessibilité avec des interrupteurs **placeholders** (rien n’est appliqué par défaut). Vous pouvez brancher vos propres styles/scripts via `data-*`, l’API JS et les CustomEvents.
+
+== Nouveautés 1.2.0 ==
+- Nouvelle page d’administration « Accessibilité » permettant de masquer certaines fonctionnalités du module pour les utilisateurs finaux.
+- Interrupteurs désactivés côté admin retirés automatiquement du widget côté visiteurs.
 
 == Nouveautés 1.1.0 ==
 - Sections du widget désormais générées dynamiquement (plus besoin de modifier le template pour ajouter vos options).
