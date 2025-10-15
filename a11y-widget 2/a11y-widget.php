@@ -69,6 +69,7 @@ function a11y_widget_get_default_sections() {
         array(
             'slug'     => 'vision',
             'title'    => __( 'Vision', 'a11y-widget' ),
+            'icon'     => 'eye',
             'children' => array(
                 array(
                     'slug'        => 'vision-placeholder',
@@ -77,11 +78,69 @@ function a11y_widget_get_default_sections() {
                     'aria_label'  => __( 'Exemple de réglage pour la vision', 'a11y-widget' ),
                     'placeholder' => true,
                 ),
+                array(
+                    'slug'       => 'vision-daltonisme',
+                    'label'      => __( 'Daltonisme', 'a11y-widget' ),
+                    'hint'       => __( 'Placeholders pour vos filtres adaptés aux différents types de daltonisme.', 'a11y-widget' ),
+                    'aria_label' => __( 'Options pour le daltonisme', 'a11y-widget' ),
+                    'children'   => array(
+                        array(
+                            'slug'        => 'vision-daltonisme-deuteranopie',
+                            'label'       => __( 'Deutéranopie', 'a11y-widget' ),
+                            'hint'        => __( 'Placeholder : appliquez un traitement adapté à la deutéranopie.', 'a11y-widget' ),
+                            'aria_label'  => __( 'Activer le mode deutéranopie', 'a11y-widget' ),
+                            'placeholder' => true,
+                        ),
+                        array(
+                            'slug'        => 'vision-daltonisme-protanopie',
+                            'label'       => __( 'Protanopie', 'a11y-widget' ),
+                            'hint'        => __( 'Placeholder : appliquez un traitement adapté à la protanopie.', 'a11y-widget' ),
+                            'aria_label'  => __( 'Activer le mode protanopie', 'a11y-widget' ),
+                            'placeholder' => true,
+                        ),
+                        array(
+                            'slug'        => 'vision-daltonisme-deuteranomalie',
+                            'label'       => __( 'Deutéranomalie', 'a11y-widget' ),
+                            'hint'        => __( 'Placeholder : ajustez vos scripts pour la deutéranomalie.', 'a11y-widget' ),
+                            'aria_label'  => __( 'Activer le mode deutéranomalie', 'a11y-widget' ),
+                            'placeholder' => true,
+                        ),
+                        array(
+                            'slug'        => 'vision-daltonisme-protanomalie',
+                            'label'       => __( 'Protanomalie', 'a11y-widget' ),
+                            'hint'        => __( 'Placeholder : ajustez vos scripts pour la protanomalie.', 'a11y-widget' ),
+                            'aria_label'  => __( 'Activer le mode protanomalie', 'a11y-widget' ),
+                            'placeholder' => true,
+                        ),
+                        array(
+                            'slug'        => 'vision-daltonisme-tritanopie',
+                            'label'       => __( 'Tritanopie', 'a11y-widget' ),
+                            'hint'        => __( 'Placeholder : appliquez un traitement adapté à la tritanopie.', 'a11y-widget' ),
+                            'aria_label'  => __( 'Activer le mode tritanopie', 'a11y-widget' ),
+                            'placeholder' => true,
+                        ),
+                        array(
+                            'slug'        => 'vision-daltonisme-tritanomalie',
+                            'label'       => __( 'Tritanomalie', 'a11y-widget' ),
+                            'hint'        => __( 'Placeholder : ajustez vos scripts pour la tritanomalie.', 'a11y-widget' ),
+                            'aria_label'  => __( 'Activer le mode tritanomalie', 'a11y-widget' ),
+                            'placeholder' => true,
+                        ),
+                        array(
+                            'slug'        => 'vision-daltonisme-achromatopsie',
+                            'label'       => __( 'Achromatopsie', 'a11y-widget' ),
+                            'hint'        => __( 'Placeholder : appliquez un mode achromatopsie.', 'a11y-widget' ),
+                            'aria_label'  => __( 'Activer le mode achromatopsie', 'a11y-widget' ),
+                            'placeholder' => true,
+                        ),
+                    ),
+                ),
             ),
         ),
         array(
             'slug'     => 'cognitif',
             'title'    => __( 'Cognitif', 'a11y-widget' ),
+            'icon'     => 'brain',
             'children' => array(
                 array(
                     'slug'        => 'cognitif-placeholder',
@@ -95,6 +154,7 @@ function a11y_widget_get_default_sections() {
         array(
             'slug'     => 'moteur',
             'title'    => __( 'Moteur', 'a11y-widget' ),
+            'icon'     => 'hand',
             'children' => array(
                 array(
                     'slug'        => 'moteur-placeholder',
@@ -108,6 +168,7 @@ function a11y_widget_get_default_sections() {
         array(
             'slug'     => 'epilepsie',
             'title'    => __( 'Épilepsie', 'a11y-widget' ),
+            'icon'     => 'bolt',
             'children' => array(
                 array(
                     'slug'        => 'epilepsie-placeholder',
@@ -121,6 +182,7 @@ function a11y_widget_get_default_sections() {
         array(
             'slug'     => 'audition',
             'title'    => __( 'Audition', 'a11y-widget' ),
+            'icon'     => 'ear',
             'children' => array(
                 array(
                     'slug'        => 'audition-placeholder',
@@ -132,6 +194,209 @@ function a11y_widget_get_default_sections() {
             ),
         ),
     );
+}
+
+/**
+ * Retrieve the SVG markup for a named icon.
+ *
+ * Icon paths are adapted from the Lucide icon set (https://lucide.dev) and
+ * distributed under the MIT License.
+ *
+ * @param string $icon_key Registered icon identifier.
+ * @param array  $args     Optional arguments. Supports `class` for custom classes.
+ *
+ * @return string
+ */
+function a11y_widget_get_icon_markup( $icon_key, $args = array() ) {
+    $icon_key = sanitize_key( $icon_key );
+
+    if ( '' === $icon_key ) {
+        return '';
+    }
+
+    $icons = array(
+        'eye'    => array(
+            'viewBox' => '0 0 24 24',
+            'elements' => array(
+                array(
+                    'type' => 'path',
+                    'd'    => 'M2 12s4.5-6 10-6 10 6 10 6-4.5 6-10 6S2 12 2 12Z',
+                ),
+                array(
+                    'type' => 'circle',
+                    'cx'   => '12',
+                    'cy'   => '12',
+                    'r'    => '3',
+                ),
+            ),
+        ),
+        'ear'    => array(
+            'viewBox' => '0 0 24 24',
+            'elements' => array(
+                array(
+                    'type' => 'path',
+                    'd'    => 'M6.5 9a5.5 5.5 0 1 1 11 0c0 2.2-1.6 3.6-1.6 4.8a3.7 3.7 0 0 1-7.4 0v-.3c0-1.4-.5-2.4-1.4-3.2',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M9.6 9.2c.6-1.4 1.9-2.3 3.4-2.3 2.1 0 3.5 1.4 3.5 3.5 0 1.4-.6 2.4-1.5 3.2l-.5.4',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M6.8 19.6c.4 1.3 1.5 2.2 2.9 2.2h1',
+                ),
+            ),
+        ),
+        'brain'  => array(
+            'viewBox' => '0 0 24 24',
+            'elements' => array(
+                array(
+                    'type' => 'path',
+                    'd'    => 'M9 4A3.5 3.5 0 0 0 5.5 7.5V8.75C4.64 9.18 4 10.3 4 11.6c0 1.3 .62 2.45 1.62 3.04L6 14.86V16c0 2.21 1.79 4 4 4h1.5c.83 0 1.5-.67 1.5-1.5V7.5A3.5 3.5 0 0 0 9 4Z',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M15 4A3.5 3.5 0 0 1 18.5 7.5V8.75c.86 .43 1.5 1.55 1.5 2.85 0 1.3-.62 2.45-1.62 3.04L18 14.86V16c0 2.21-1.79 4-4 4h-1.5c-.83 0-1.5-.67-1.5-1.5V7.5A3.5 3.5 0 0 1 15 4Z',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M9 10.5a1.5 1.5 0 0 0 0 3',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M15 10.5a1.5 1.5 0 0 1 0 3',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M12 6v12',
+                ),
+            ),
+        ),
+        'hand'   => array(
+            'viewBox' => '0 0 24 24',
+            'elements' => array(
+                array(
+                    'type' => 'path',
+                    'd'    => 'M18 11.2V6.2a2.2 2.2 0 1 0-4.4 0v5',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M13.6 10.6V4.8a2.2 2.2 0 1 0-4.4 0v6.6',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M9.2 11V6.6a2 2 0 1 0-4 0v7c0 3.9 2 7.2 5.1 8.9a6.5 6.5 0 0 0 3 .7h1c3.2 0 5.7-2.6 5.7-5.7V12',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M6.2 12.5c0-2-.8-3.4-1.8-4.3',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M9.5 15.3c.8 1.7 2.5 2.9 4.5 2.9A3.2 3.2 0 0 0 17.2 15V12',
+                ),
+            ),
+        ),
+        'bolt'   => array(
+            'viewBox' => '0 0 24 24',
+            'elements' => array(
+                array(
+                    'type' => 'path',
+                    'd'    => 'M13 2 4 14h7l-1 8 9-12h-7l1-8Z',
+                ),
+            ),
+        ),
+    );
+
+    if ( ! isset( $icons[ $icon_key ] ) ) {
+        return '';
+    }
+
+    $icon   = $icons[ $icon_key ];
+    $class  = '';
+    $output = '';
+
+    if ( ! empty( $args['class'] ) ) {
+        $classes = is_array( $args['class'] ) ? $args['class'] : preg_split( '/\s+/', (string) $args['class'] );
+        $classes = array_map( 'sanitize_html_class', array_filter( (array) $classes ) );
+        if ( ! empty( $classes ) ) {
+            $class = implode( ' ', $classes );
+        }
+    }
+
+    ob_start();
+    ?>
+    <svg
+        viewBox="<?php echo esc_attr( isset( $icon['viewBox'] ) ? $icon['viewBox'] : '0 0 24 24' ); ?>"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        focusable="false"
+        aria-hidden="true"
+        <?php if ( '' !== $class ) : ?>class="<?php echo esc_attr( $class ); ?>"<?php endif; ?>
+    >
+        <?php foreach ( $icon['elements'] as $element ) :
+            $type = isset( $element['type'] ) ? $element['type'] : '';
+
+            if ( 'path' === $type && ! empty( $element['d'] ) ) :
+                ?>
+                <path d="<?php echo esc_attr( $element['d'] ); ?>" />
+                <?php
+            elseif ( 'circle' === $type && isset( $element['cx'], $element['cy'], $element['r'] ) ) :
+                ?>
+                <circle cx="<?php echo esc_attr( $element['cx'] ); ?>" cy="<?php echo esc_attr( $element['cy'] ); ?>" r="<?php echo esc_attr( $element['r'] ); ?>" />
+                <?php
+            endif;
+        endforeach; ?>
+    </svg>
+    <?php
+    $output = ob_get_clean();
+
+    return trim( $output );
+}
+
+/**
+ * Normalize nested children for a feature definition.
+ *
+ * @param array $feature Feature data.
+ *
+ * @return array
+ */
+function a11y_widget_normalize_nested_children( $feature ) {
+    if ( ! is_array( $feature ) ) {
+        return array();
+    }
+
+    if ( empty( $feature['children'] ) || ! is_array( $feature['children'] ) ) {
+        if ( isset( $feature['children'] ) && ! is_array( $feature['children'] ) ) {
+            unset( $feature['children'] );
+        }
+
+        return $feature;
+    }
+
+    $normalized_children = array();
+
+    foreach ( $feature['children'] as $child ) {
+        if ( ! is_array( $child ) || empty( $child['slug'] ) ) {
+            continue;
+        }
+
+        $child_slug = sanitize_key( $child['slug'] );
+
+        if ( '' === $child_slug ) {
+            continue;
+        }
+
+        $child['slug'] = $child_slug;
+        $normalized_children[] = a11y_widget_normalize_nested_children( $child );
+    }
+
+    $feature['children'] = $normalized_children;
+
+    return $feature;
 }
 
 /**
@@ -305,12 +570,19 @@ function a11y_widget_get_sections() {
             $sections_by_slug[ $slug ] = array(
                 'slug'           => $slug,
                 'title'          => isset( $section['title'] ) ? $section['title'] : '',
+                'icon'           => isset( $section['icon'] ) ? sanitize_key( $section['icon'] ) : '',
                 'children'       => array(),
                 'children_order' => array(),
             );
             $ordered_slugs[] = $slug;
-        } elseif ( isset( $section['title'] ) && '' !== $section['title'] && '' === $sections_by_slug[ $slug ]['title'] ) {
-            $sections_by_slug[ $slug ]['title'] = $section['title'];
+        } else {
+            if ( isset( $section['title'] ) && '' !== $section['title'] && '' === $sections_by_slug[ $slug ]['title'] ) {
+                $sections_by_slug[ $slug ]['title'] = $section['title'];
+            }
+
+            if ( isset( $section['icon'] ) && '' === $sections_by_slug[ $slug ]['icon'] ) {
+                $sections_by_slug[ $slug ]['icon'] = sanitize_key( $section['icon'] );
+            }
         }
 
         $children = array();
@@ -333,6 +605,7 @@ function a11y_widget_get_sections() {
             }
 
             $child['slug'] = $child_slug;
+            $child         = a11y_widget_normalize_nested_children( $child );
             $sections_by_slug[ $slug ]['children'][ $child_slug ] = $child;
             $sections_by_slug[ $slug ]['children_order'][]        = $child_slug;
             $child_slug_global[ $child_slug ]                     = true;
@@ -355,12 +628,19 @@ function a11y_widget_get_sections() {
             $sections_by_slug[ $slug ] = array(
                 'slug'           => $slug,
                 'title'          => isset( $section['title'] ) ? $section['title'] : '',
+                'icon'           => isset( $section['icon'] ) ? sanitize_key( $section['icon'] ) : '',
                 'children'       => array(),
                 'children_order' => array(),
             );
             $ordered_slugs[] = $slug;
-        } elseif ( '' !== $section['title'] && '' === $sections_by_slug[ $slug ]['title'] ) {
-            $sections_by_slug[ $slug ]['title'] = $section['title'];
+        } else {
+            if ( '' !== $section['title'] && '' === $sections_by_slug[ $slug ]['title'] ) {
+                $sections_by_slug[ $slug ]['title'] = $section['title'];
+            }
+
+            if ( isset( $section['icon'] ) && '' === $sections_by_slug[ $slug ]['icon'] ) {
+                $sections_by_slug[ $slug ]['icon'] = sanitize_key( $section['icon'] );
+            }
         }
 
         if ( empty( $section['children'] ) ) {
@@ -386,6 +666,7 @@ function a11y_widget_get_sections() {
             }
 
             $child['slug']                                   = $child_slug;
+            $child                                           = a11y_widget_normalize_nested_children( $child );
             $child_slug_global[ $child_slug ]                = true;
             $sections_by_slug[ $slug ]['children'][ $child_slug ] = $child;
             $sections_by_slug[ $slug ]['children_order'][]        = $child_slug;
