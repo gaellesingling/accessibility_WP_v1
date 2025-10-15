@@ -164,6 +164,14 @@ function a11y_widget_enqueue_admin_assets( $hook ) {
         array(),
         A11Y_WIDGET_VERSION
     );
+
+    wp_enqueue_script(
+        'a11y-widget-admin',
+        A11Y_WIDGET_URL . 'assets/admin.js',
+        array( 'jquery', 'jquery-ui-sortable' ),
+        A11Y_WIDGET_VERSION,
+        true
+    );
 }
 add_action( 'admin_enqueue_scripts', 'a11y_widget_enqueue_admin_assets' );
 
@@ -219,30 +227,54 @@ function a11y_widget_render_admin_page() {
                         $section_title = isset( $section['title'] ) ? $section['title'] : '';
                         $section_slug  = isset( $section['slug'] ) ? sanitize_title( $section['slug'] ) : '';
                         $children      = isset( $section['children'] ) && is_array( $section['children'] ) ? $section['children'] : array();
+
+                        if ( '' === $section_slug ) {
+                            continue;
+                        }
                         ?>
                         <fieldset class="a11y-widget-admin-section">
                             <legend class="a11y-widget-admin-section__title"><?php echo esc_html( $section_title ); ?></legend>
 
-                            <div class="a11y-widget-admin-section__content">
-                                <?php if ( empty( $children ) ) : ?>
-                                    <p class="a11y-widget-admin-empty">
-                                        <em><?php esc_html_e( 'Aucune fonctionnalité dans cette catégorie.', 'a11y-widget' ); ?></em>
-                                    </p>
-                                <?php else : ?>
-                                    <?php
-                                    foreach ( $children as $feature ) :
-                                        $feature_slug  = isset( $feature['slug'] ) ? sanitize_key( $feature['slug'] ) : '';
-                                        $feature_label = isset( $feature['label'] ) ? $feature['label'] : '';
-                                        $feature_hint  = isset( $feature['hint'] ) ? $feature['hint'] : '';
+                            <div class="a11y-widget-admin-section__content" data-section="<?php echo esc_attr( $section_slug ); ?>">
+                                <input
+                                    type="hidden"
+                                    class="a11y-widget-admin-layout"
+                                    name="<?php echo esc_attr( $layout_option_key ); ?>[<?php echo esc_attr( $section_slug ); ?>]"
+                                    value="<?php echo esc_attr( implode( ',', wp_list_pluck( $children, 'slug' ) ) ); ?>"
+                                />
 
-                                        if ( '' === $feature_slug || '' === $feature_label ) {
-                                            continue;
-                                        }
+                                <p class="a11y-widget-admin-empty a11y-widget-admin-section__empty-message"<?php if ( ! empty( $children ) ) : ?> hidden<?php endif; ?>>
+                                    <em><?php esc_html_e( 'Aucune fonctionnalité dans cette catégorie.', 'a11y-widget' ); ?></em>
+                                </p>
 
-                                        $is_disabled = isset( $disabled_lookup[ $feature_slug ] );
-                                        $input_id    = 'a11y-widget-toggle-' . ( $section_slug ? $section_slug . '-' : '' ) . $feature_slug;
-                                        ?>
-                                        <div class="a11y-widget-admin-feature">
+                                <?php
+                                foreach ( $children as $feature ) :
+                                    $feature_slug  = isset( $feature['slug'] ) ? sanitize_key( $feature['slug'] ) : '';
+                                    $feature_label = isset( $feature['label'] ) ? $feature['label'] : '';
+                                    $feature_hint  = isset( $feature['hint'] ) ? $feature['hint'] : '';
+
+                                    if ( '' === $feature_slug || '' === $feature_label ) {
+                                        continue;
+                                    }
+
+                                    $is_disabled = isset( $disabled_lookup[ $feature_slug ] );
+                                    $input_id    = 'a11y-widget-toggle-' . ( $section_slug ? $section_slug . '-' : '' ) . $feature_slug;
+                                    ?>
+                                    <div class="a11y-widget-admin-feature" data-feature-slug="<?php echo esc_attr( $feature_slug ); ?>">
+                                        <button type="button" class="a11y-widget-admin-feature__handle">
+                                            <span class="screen-reader-text">
+                                                <?php
+                                                printf(
+                                                    /* translators: %s: feature label */
+                                                    esc_html__( 'Déplacer la fonctionnalité « %s »', 'a11y-widget' ),
+                                                    wp_strip_all_tags( $feature_label )
+                                                );
+                                                ?>
+                                            </span>
+                                            <span class="dashicons dashicons-move" aria-hidden="true"></span>
+                                        </button>
+
+                                        <div class="a11y-widget-admin-feature__main">
                                             <div class="a11y-widget-admin-feature__description">
                                                 <label for="<?php echo esc_attr( $input_id ); ?>">
                                                     <span class="a11y-widget-admin-feature__label"><?php echo esc_html( $feature_label ); ?></span>
@@ -280,8 +312,8 @@ function a11y_widget_render_admin_page() {
                                                 </label>
                                             </div>
                                         </div>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
                         </fieldset>
                     <?php endforeach; ?>
