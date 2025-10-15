@@ -312,14 +312,30 @@ function a11y_widget_render_admin_page() {
                     foreach ( $sections as $section ) :
                         $section_title = isset( $section['title'] ) ? $section['title'] : '';
                         $section_slug  = isset( $section['slug'] ) ? sanitize_title( $section['slug'] ) : '';
+                        $section_icon  = isset( $section['icon'] ) ? sanitize_key( $section['icon'] ) : '';
+                        $icon_markup   = '';
                         $children      = isset( $section['children'] ) && is_array( $section['children'] ) ? $section['children'] : array();
+
+                        if ( '' !== $section_icon && function_exists( 'a11y_widget_get_icon_markup' ) ) {
+                            $icon_markup = a11y_widget_get_icon_markup(
+                                $section_icon,
+                                array(
+                                    'class' => 'a11y-widget-admin-section__icon-svg',
+                                )
+                            );
+                        }
 
                         if ( '' === $section_slug ) {
                             continue;
                         }
                         ?>
                         <fieldset class="a11y-widget-admin-section">
-                            <legend class="a11y-widget-admin-section__title"><?php echo esc_html( $section_title ); ?></legend>
+                            <legend class="a11y-widget-admin-section__title">
+                                <?php if ( '' !== $icon_markup ) : ?>
+                                    <span class="a11y-widget-admin-section__icon" aria-hidden="true"><?php echo $icon_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+                                <?php endif; ?>
+                                <span class="a11y-widget-admin-section__title-text"><?php echo esc_html( $section_title ); ?></span>
+                            </legend>
 
                             <?php
                             $layout_input_id = 'a11y-widget-layout-' . $section_slug;

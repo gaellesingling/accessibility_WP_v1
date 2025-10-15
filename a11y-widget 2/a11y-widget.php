@@ -69,6 +69,7 @@ function a11y_widget_get_default_sections() {
         array(
             'slug'     => 'vision',
             'title'    => __( 'Vision', 'a11y-widget' ),
+            'icon'     => 'eye',
             'children' => array(
                 array(
                     'slug'        => 'vision-placeholder',
@@ -139,6 +140,7 @@ function a11y_widget_get_default_sections() {
         array(
             'slug'     => 'cognitif',
             'title'    => __( 'Cognitif', 'a11y-widget' ),
+            'icon'     => 'brain',
             'children' => array(
                 array(
                     'slug'        => 'cognitif-placeholder',
@@ -152,6 +154,7 @@ function a11y_widget_get_default_sections() {
         array(
             'slug'     => 'moteur',
             'title'    => __( 'Moteur', 'a11y-widget' ),
+            'icon'     => 'person',
             'children' => array(
                 array(
                     'slug'        => 'moteur-placeholder',
@@ -165,6 +168,7 @@ function a11y_widget_get_default_sections() {
         array(
             'slug'     => 'epilepsie',
             'title'    => __( 'Épilepsie', 'a11y-widget' ),
+            'icon'     => 'bolt',
             'children' => array(
                 array(
                     'slug'        => 'epilepsie-placeholder',
@@ -178,6 +182,7 @@ function a11y_widget_get_default_sections() {
         array(
             'slug'     => 'audition',
             'title'    => __( 'Audition', 'a11y-widget' ),
+            'icon'     => 'ear',
             'children' => array(
                 array(
                     'slug'        => 'audition-placeholder',
@@ -189,6 +194,181 @@ function a11y_widget_get_default_sections() {
             ),
         ),
     );
+}
+
+/**
+ * Retrieve the SVG markup for a named icon.
+ *
+ * Icon paths are adapted from the Lucide icon set (https://lucide.dev) and
+ * distributed under the MIT License.
+ *
+ * @param string $icon_key Registered icon identifier.
+ * @param array  $args     Optional arguments. Supports `class` for custom classes.
+ *
+ * @return string
+ */
+function a11y_widget_get_icon_markup( $icon_key, $args = array() ) {
+    $icon_key = sanitize_key( $icon_key );
+
+    if ( '' === $icon_key ) {
+        return '';
+    }
+
+    $icons = array(
+        'eye'    => array(
+            'viewBox' => '0 0 24 24',
+            'elements' => array(
+                array(
+                    'type' => 'path',
+                    'd'    => 'M2 12s4.5-6 10-6 10 6 10 6-4.5 6-10 6S2 12 2 12Z',
+                ),
+                array(
+                    'type' => 'circle',
+                    'cx'   => '12',
+                    'cy'   => '12',
+                    'r'    => '3',
+                ),
+            ),
+        ),
+        'ear'    => array(
+            'viewBox' => '0 0 24 24',
+            'elements' => array(
+                array(
+                    'type' => 'path',
+                    'd'    => 'M6 8.5C6 6.015 8.015 4 10.5 4 12.985 4 15 6.015 15 8.5',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M6 8.5V9a7 7 0 0 0 7 7',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M6 8.5C6 11.062 4 12.25 4 14.5S6.5 19 9 19s4-1.5 4-4',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M13 15a2 2 0 1 0 4 0v-1c0-3.5-2.5-6-5.5-6S6 7.5 6 11',
+                ),
+            ),
+        ),
+        'brain'  => array(
+            'viewBox' => '0 0 24 24',
+            'elements' => array(
+                array(
+                    'type' => 'path',
+                    'd'    => 'M8 3a3 3 0 0 0-3 3v1a3 3 0 0 0-1 2.236',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M8 3h2a3 3 0 0 1 3 3v2',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M8 8a3 3 0 0 0-3 3v1',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M8 8h2a3 3 0 0 1 3 3v2',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M16 3a3 3 0 0 1 3 3v1a3 3 0 0 1 1 2.236',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M16 3h-2a3 3 0 0 0-3 3v2',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M16 8a3 3 0 0 1 3 3v1',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M16 8h-2a3 3 0 0 0-3 3v2',
+                ),
+            ),
+        ),
+        'person' => array(
+            'viewBox' => '0 0 24 24',
+            'elements' => array(
+                array(
+                    'type' => 'circle',
+                    'cx'   => '12',
+                    'cy'   => '5',
+                    'r'    => '2',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M7 21.5 9 13l3-2 3 2 2 8.5',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M5 11h14',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'm9 15 3-2 3 2',
+                ),
+            ),
+        ),
+        'bolt'   => array(
+            'viewBox' => '0 0 24 24',
+            'elements' => array(
+                array(
+                    'type' => 'path',
+                    'd'    => 'M13 2 4 14h7l-1 8 9-12h-7l1-8Z',
+                ),
+            ),
+        ),
+    );
+
+    if ( ! isset( $icons[ $icon_key ] ) ) {
+        return '';
+    }
+
+    $icon   = $icons[ $icon_key ];
+    $class  = '';
+    $output = '';
+
+    if ( ! empty( $args['class'] ) ) {
+        $classes = is_array( $args['class'] ) ? $args['class'] : preg_split( '/\s+/', (string) $args['class'] );
+        $classes = array_map( 'sanitize_html_class', array_filter( (array) $classes ) );
+        if ( ! empty( $classes ) ) {
+            $class = implode( ' ', $classes );
+        }
+    }
+
+    ob_start();
+    ?>
+    <svg
+        viewBox="<?php echo esc_attr( isset( $icon['viewBox'] ) ? $icon['viewBox'] : '0 0 24 24' ); ?>"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        focusable="false"
+        aria-hidden="true"
+        <?php if ( '' !== $class ) : ?>class="<?php echo esc_attr( $class ); ?>"<?php endif; ?>
+    >
+        <?php foreach ( $icon['elements'] as $element ) :
+            $type = isset( $element['type'] ) ? $element['type'] : '';
+
+            if ( 'path' === $type && ! empty( $element['d'] ) ) :
+                ?>
+                <path d="<?php echo esc_attr( $element['d'] ); ?>" />
+                <?php
+            elseif ( 'circle' === $type && isset( $element['cx'], $element['cy'], $element['r'] ) ) :
+                ?>
+                <circle cx="<?php echo esc_attr( $element['cx'] ); ?>" cy="<?php echo esc_attr( $element['cy'] ); ?>" r="<?php echo esc_attr( $element['r'] ); ?>" />
+                <?php
+            endif;
+        endforeach; ?>
+    </svg>
+    <?php
+    $output = ob_get_clean();
+
+    return trim( $output );
 }
 
 /**
@@ -404,12 +584,19 @@ function a11y_widget_get_sections() {
             $sections_by_slug[ $slug ] = array(
                 'slug'           => $slug,
                 'title'          => isset( $section['title'] ) ? $section['title'] : '',
+                'icon'           => isset( $section['icon'] ) ? sanitize_key( $section['icon'] ) : '',
                 'children'       => array(),
                 'children_order' => array(),
             );
             $ordered_slugs[] = $slug;
-        } elseif ( isset( $section['title'] ) && '' !== $section['title'] && '' === $sections_by_slug[ $slug ]['title'] ) {
-            $sections_by_slug[ $slug ]['title'] = $section['title'];
+        } else {
+            if ( isset( $section['title'] ) && '' !== $section['title'] && '' === $sections_by_slug[ $slug ]['title'] ) {
+                $sections_by_slug[ $slug ]['title'] = $section['title'];
+            }
+
+            if ( isset( $section['icon'] ) && '' === $sections_by_slug[ $slug ]['icon'] ) {
+                $sections_by_slug[ $slug ]['icon'] = sanitize_key( $section['icon'] );
+            }
         }
 
         $children = array();
@@ -455,12 +642,19 @@ function a11y_widget_get_sections() {
             $sections_by_slug[ $slug ] = array(
                 'slug'           => $slug,
                 'title'          => isset( $section['title'] ) ? $section['title'] : '',
+                'icon'           => isset( $section['icon'] ) ? sanitize_key( $section['icon'] ) : '',
                 'children'       => array(),
                 'children_order' => array(),
             );
             $ordered_slugs[] = $slug;
-        } elseif ( '' !== $section['title'] && '' === $sections_by_slug[ $slug ]['title'] ) {
-            $sections_by_slug[ $slug ]['title'] = $section['title'];
+        } else {
+            if ( '' !== $section['title'] && '' === $sections_by_slug[ $slug ]['title'] ) {
+                $sections_by_slug[ $slug ]['title'] = $section['title'];
+            }
+
+            if ( isset( $section['icon'] ) && '' === $sections_by_slug[ $slug ]['icon'] ) {
+                $sections_by_slug[ $slug ]['icon'] = sanitize_key( $section['icon'] );
+            }
         }
 
         if ( empty( $section['children'] ) ) {
