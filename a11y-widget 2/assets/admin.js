@@ -1,71 +1,216 @@
-(function ($) {
+(function () {
     'use strict';
 
-    function updateSection($container) {
+    function toArray(list) {
+        return Array.prototype.slice.call(list || []);
+    }
+
+    function getLayoutInput(container) {
+        var selector = container.getAttribute('data-layout-input');
+        if (selector) {
+            var target = document.querySelector(selector);
+            if (target) {
+                return target;
+            }
+        }
+        return container.querySelector('.a11y-widget-admin-layout');
+    }
+
+    function updateSection(container) {
         var slugs = [];
-
-        $container.children('.a11y-widget-admin-feature').each(function () {
-            var slug = $(this).data('featureSlug');
-
+        toArray(container.querySelectorAll('.a11y-widget-admin-feature')).forEach(function (feature) {
+            var slug = feature.getAttribute('data-feature-slug');
             if (slug) {
                 slugs.push(slug);
             }
         });
 
-        var $input = $container.children('.a11y-widget-admin-layout');
-        if ($input.length) {
-            $input.val(slugs.join(','));
+        var input = getLayoutInput(container);
+        if (input) {
+            input.value = slugs.join(',');
         }
 
-        var $empty = $container.children('.a11y-widget-admin-section__empty-message');
-        if ($empty.length) {
+        var empty = container.querySelector('.a11y-widget-admin-section__empty-message');
+        if (empty) {
             if (slugs.length) {
-                $empty.attr('hidden', 'hidden');
+                empty.setAttribute('hidden', 'hidden');
             } else {
-                $empty.removeAttr('hidden');
+                empty.removeAttribute('hidden');
             }
         }
     }
 
-    function refreshAll($containers) {
-        $containers.each(function () {
-            updateSection($(this));
-        });
+    function refreshAll(containers) {
+        toArray(containers).forEach(updateSection);
     }
 
-    $(function () {
-        var $containers = $('.a11y-widget-admin-section__content');
+    function closestContainer(element) {
+        while (element && element !== document) {
+            if (element.classList && element.classList.contains('a11y-widget-admin-section__content')) {
+                return element;
+            }
 
-        if (!$containers.length || !$.fn.sortable) {
+            element = element.parentElement;
+        }
+
+        return null;
+    }
+
+    function getDragAfterElement(container, y) {
+        var siblings = toArray(container.querySelectorAll('.a11y-widget-admin-feature:not(.a11y-widget-admin-feature--dragging)'));
+        var closest = {
+            offset: Number.NEGATIVE_INFINITY,
+            element: null
+        };
+
+        siblings.forEach(function (child) {
+            var box = child.getBoundingClientRect();
+            var offset = y - box.top - box.height / 2;
+
+            if (offset < 0 && offset > closest.offset) {
+                closest = {
+                    offset: offset,
+                    element: child
+                };
+            }
+        });
+
+        return closest.element;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var containers = toArray(document.querySelectorAll('.a11y-widget-admin-section__content'));
+
+        if (!containers.length) {
             return;
         }
 
-        $containers.sortable({
-            items: '.a11y-widget-admin-feature',
-            connectWith: '.a11y-widget-admin-section__content',
-            handle: '.a11y-widget-admin-feature__handle',
-            placeholder: 'a11y-widget-admin-feature a11y-widget-admin-feature--placeholder',
-            tolerance: 'pointer',
-            forcePlaceholderSize: true,
-            start: function (event, ui) {
-                ui.item.addClass('a11y-widget-admin-feature--dragging');
-            },
-            stop: function (event, ui) {
-                ui.item.removeClass('a11y-widget-admin-feature--dragging');
-                refreshAll($containers);
-            },
-            update: function () {
-                refreshAll($containers);
-            },
-            receive: function () {
-                refreshAll($containers);
+        var draggedFeature = null;
+        var dragOrigin = null;
+        var dragNextSibling = null;
+        var dropOccurred = false;
+
+        function cleanupDrag() {
+            containers.forEach(function (container) {
+                container.classList.remove('a11y-widget-admin-section__content--drag-over');
+            });
+
+            if (draggedFeature) {
+                draggedFeature.classList.remove('a11y-widget-admin-feature--dragging');
             }
+
+            if (draggedFeature) {
+                draggedFeature = null;
+            }
+
+            dragOrigin = null;
+            dragNextSibling = null;
+            dropOccurred = false;
+        }
+
+        function enableFeatureDrag(feature) {
+            feature.setAttribute('draggable', 'true');
+
+            feature.addEventListener('dragstart', function (event) {
+                draggedFeature = feature;
+                dragOrigin = feature.parentElement;
+                dragNextSibling = feature.nextElementSibling;
+                dropOccurred = false;
+
+                feature.classList.add('a11y-widget-admin-feature--dragging');
+
+                if (event.dataTransfer) {
+                    event.dataTransfer.effectAllowed = 'move';
+                    try {
+                        event.dataTransfer.setData('text/plain', feature.getAttribute('data-feature-slug') || 'feature');
+                        if (event.dataTransfer.setDragImage) {
+                            event.dataTransfer.setDragImage(feature, event.offsetX || 0, event.offsetY || 0);
+                        }
+                    } catch (err) {
+                        // Ignore errors from browsers that disallow setting data.
+                    }
+                }
+            });
+
+            feature.addEventListener('dragend', function () {
+                if (!dropOccurred && dragOrigin) {
+                    if (dragNextSibling && dragNextSibling.parentNode === dragOrigin) {
+                        dragOrigin.insertBefore(feature, dragNextSibling);
+                    } else {
+                        dragOrigin.appendChild(feature);
+                    }
+                }
+
+                refreshAll(containers);
+                cleanupDrag();
+            });
+        }
+
+        containers.forEach(function (container) {
+            toArray(container.querySelectorAll('.a11y-widget-admin-feature')).forEach(enableFeatureDrag);
+
+            container.addEventListener('dragenter', function (event) {
+                if (!draggedFeature) {
+                    return;
+                }
+                event.preventDefault();
+                container.classList.add('a11y-widget-admin-section__content--drag-over');
+            });
+
+            container.addEventListener('dragover', function (event) {
+                if (!draggedFeature) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                var afterElement = getDragAfterElement(container, event.clientY);
+
+                if (!afterElement) {
+                    container.appendChild(draggedFeature);
+                } else if (afterElement !== draggedFeature) {
+                    container.insertBefore(draggedFeature, afterElement);
+                }
+            });
+
+            container.addEventListener('dragleave', function (event) {
+                if (!draggedFeature) {
+                    return;
+                }
+
+                if (!container.contains(event.relatedTarget)) {
+                    container.classList.remove('a11y-widget-admin-section__content--drag-over');
+                }
+            });
+
+            container.addEventListener('drop', function (event) {
+                if (!draggedFeature) {
+                    return;
+                }
+
+                event.preventDefault();
+                dropOccurred = true;
+                container.classList.remove('a11y-widget-admin-section__content--drag-over');
+            });
         });
 
-        refreshAll($containers);
+        document.addEventListener('drop', function (event) {
+            if (!draggedFeature) {
+                return;
+            }
 
-        $containers.closest('form').on('submit', function () {
-            refreshAll($containers);
-        });
+            if (closestContainer(event.target)) {
+                dropOccurred = true;
+            }
+        }, true);
+
+        refreshAll(containers);
+
+        var form = document.querySelector('.a11y-widget-admin form');
+        if (form) {
+            form.addEventListener('submit', function () {
+                refreshAll(containers);
+            });
+        }
     });
-})(jQuery);
+})();
