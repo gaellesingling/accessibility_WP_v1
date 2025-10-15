@@ -42,6 +42,8 @@
             $section_title = isset( $section['title'] ) ? $section['title'] : '';
             $children      = isset( $section['children'] ) ? (array) $section['children'] : array();
             $features_data = array();
+            $section_icon  = isset( $section['icon'] ) ? sanitize_key( $section['icon'] ) : '';
+            $icon_markup   = '';
 
             if ( ! empty( $children ) ) {
                 foreach ( $children as $feature ) {
@@ -90,11 +92,21 @@
                 }
             }
 
+            if ( '' !== $section_icon && function_exists( 'a11y_widget_get_icon_markup' ) ) {
+                $icon_markup = a11y_widget_get_icon_markup(
+                    $section_icon,
+                    array(
+                        'class' => 'a11y-tab__icon-svg',
+                    )
+                );
+            }
+
             $payload[] = array(
                 'index'    => (int) $index,
                 'id'       => $section_id,
                 'slug'     => $section_slug ? $section_slug : $section_id,
                 'title'    => wp_strip_all_tags( $section_title ),
+                'icon'     => $section_icon,
                 'features' => $features_data,
             );
 
@@ -117,8 +129,12 @@
               data-section-index="<?php echo esc_attr( $index ); ?>"
               data-section-id="<?php echo esc_attr( $section_id ); ?>"
               data-tablist-id="<?php echo esc_attr( $tablist_id ); ?>"
+              <?php if ( '' !== $section_icon ) : ?>data-section-icon="<?php echo esc_attr( $section_icon ); ?>"<?php endif; ?>
             >
-              <?php echo esc_html( $section_title ); ?>
+              <?php if ( '' !== $icon_markup ) : ?>
+                <span class="a11y-tab__icon" aria-hidden="true"><?php echo $icon_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+              <?php endif; ?>
+              <span class="a11y-tab__label"><?php echo esc_html( $section_title ); ?></span>
             </button>
           <?php endforeach; ?>
         </nav>
