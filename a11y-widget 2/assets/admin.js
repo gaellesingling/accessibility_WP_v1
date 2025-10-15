@@ -1,20 +1,6 @@
 (function ($) {
     'use strict';
 
-    function getLayoutInput($container) {
-        var layoutSelector = $container.data('layoutInput');
-
-        if (layoutSelector) {
-            var $target = $(layoutSelector);
-
-            if ($target.length) {
-                return $target;
-            }
-        }
-
-        return $container.children('.a11y-widget-admin-layout');
-    }
-
     function updateSection($container) {
         var slugs = [];
 
@@ -26,7 +12,7 @@
             }
         });
 
-        var $input = getLayoutInput($container);
+        var $input = $container.children('.a11y-widget-admin-layout');
         if ($input.length) {
             $input.val(slugs.join(','));
         }
@@ -61,7 +47,6 @@
             placeholder: 'a11y-widget-admin-feature a11y-widget-admin-feature--placeholder',
             tolerance: 'pointer',
             forcePlaceholderSize: true,
-            cancel: '.a11y-widget-admin-toggle, .a11y-widget-switch, .a11y-widget-switch *',
             start: function (event, ui) {
                 ui.item.addClass('a11y-widget-admin-feature--dragging');
             },

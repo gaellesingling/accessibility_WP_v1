@@ -53,6 +53,9 @@ fieldset.a11y-widget-admin-section {
 
 .a11y-widget-admin-section__content {
   padding: 20px 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
   min-height: 72px;
 }
 
