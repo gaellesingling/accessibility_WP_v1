@@ -48,6 +48,24 @@ function a11y_widget_get_disabled_features_option_name() {
 }
 
 /**
+ * Option name helper for the "force all features" toggle.
+ *
+ * @return string
+ */
+function a11y_widget_get_force_all_features_option_name() {
+    return 'a11y_widget_force_all_features';
+}
+
+/**
+ * Option name helper for the custom feature layout.
+ *
+ * @return string
+ */
+function a11y_widget_get_feature_layout_option_name() {
+    return 'a11y_widget_feature_layout';
+}
+
+/**
  * Retrieve the list of disabled features stored in the database.
  *
  * @return string[]
@@ -60,6 +78,26 @@ function a11y_widget_get_disabled_features() {
     }
 
     return a11y_widget_normalize_feature_slugs( $stored );
+}
+
+/**
+ * Determine if all features should be displayed, regardless of customization.
+ *
+ * @return bool
+ */
+function a11y_widget_force_all_features_enabled() {
+    return (bool) get_option( a11y_widget_get_force_all_features_option_name(), true );
+}
+
+/**
+ * Retrieve the stored feature layout with sanitized slugs.
+ *
+ * @return array<string, string[]>
+ */
+function a11y_widget_get_feature_layout() {
+    $layout = get_option( a11y_widget_get_feature_layout_option_name(), array() );
+
+    return a11y_widget_sanitize_feature_layout( $layout );
 }
 
 /**
@@ -78,6 +116,68 @@ function a11y_widget_sanitize_disabled_features( $input ) {
 }
 
 /**
+ * Sanitize the "force all features" option.
+ *
+ * @param mixed $input Raw input value.
+ *
+ * @return bool
+ */
+function a11y_widget_sanitize_force_all_features( $input ) {
+    return ! empty( $input );
+}
+
+/**
+ * Sanitize the custom feature layout option.
+ *
+ * @param mixed $input Raw input.
+ *
+ * @return array<string, string[]>
+ */
+function a11y_widget_sanitize_feature_layout( $input ) {
+    if ( ! is_array( $input ) ) {
+        return array();
+    }
+
+    $layout = array();
+
+    foreach ( $input as $section_slug => $children ) {
+        $section_slug = sanitize_title( $section_slug );
+
+        if ( '' === $section_slug ) {
+            continue;
+        }
+
+        if ( is_string( $children ) ) {
+            $children = preg_split( '/,/', $children );
+        }
+
+        if ( ! is_array( $children ) ) {
+            continue;
+        }
+
+        $child_lookup = array();
+
+        foreach ( $children as $child_slug ) {
+            if ( is_array( $child_slug ) ) {
+                continue;
+            }
+
+            $child_slug = sanitize_key( $child_slug );
+
+            if ( '' === $child_slug ) {
+                continue;
+            }
+
+            $child_lookup[ $child_slug ] = true;
+        }
+
+        $layout[ $section_slug ] = array_keys( $child_lookup );
+    }
+
+    return $layout;
+}
+
+/**
  * Register plugin settings used by the admin screen.
  */
 function a11y_widget_register_settings() {
@@ -87,6 +187,26 @@ function a11y_widget_register_settings() {
         array(
             'type'              => 'array',
             'sanitize_callback' => 'a11y_widget_sanitize_disabled_features',
+            'default'           => array(),
+        )
+    );
+
+    register_setting(
+        'a11y_widget_settings',
+        a11y_widget_get_force_all_features_option_name(),
+        array(
+            'type'              => 'boolean',
+            'sanitize_callback' => 'a11y_widget_sanitize_force_all_features',
+            'default'           => true,
+        )
+    );
+
+    register_setting(
+        'a11y_widget_settings',
+        a11y_widget_get_feature_layout_option_name(),
+        array(
+            'type'              => 'array',
+            'sanitize_callback' => 'a11y_widget_sanitize_feature_layout',
             'default'           => array(),
         )
     );
@@ -125,6 +245,14 @@ function a11y_widget_enqueue_admin_assets( $hook ) {
         array(),
         A11Y_WIDGET_VERSION
     );
+
+    wp_enqueue_script(
+        'a11y-widget-admin',
+        A11Y_WIDGET_URL . 'assets/admin.js',
+        array( 'jquery', 'jquery-ui-sortable' ),
+        A11Y_WIDGET_VERSION,
+        true
+    );
 }
 add_action( 'admin_enqueue_scripts', 'a11y_widget_enqueue_admin_assets' );
 
@@ -136,9 +264,12 @@ function a11y_widget_render_admin_page() {
         return;
     }
 
-    $sections        = a11y_widget_get_sections();
-    $disabled        = a11y_widget_get_disabled_features();
-    $disabled_lookup = array_fill_keys( $disabled, true );
+    $sections             = a11y_widget_get_sections();
+    $disabled             = a11y_widget_get_disabled_features();
+    $disabled_lookup      = array_fill_keys( $disabled, true );
+    $force_all_features   = a11y_widget_force_all_features_enabled();
+    $force_all_option_key = a11y_widget_get_force_all_features_option_name();
+    $layout_option_key    = a11y_widget_get_feature_layout_option_name();
     ?>
     <div class="wrap a11y-widget-admin">
         <h1><?php esc_html_e( 'Accessibilité RGAA', 'a11y-widget' ); ?></h1>
@@ -148,6 +279,28 @@ function a11y_widget_render_admin_page() {
 
         <form method="post" action="options.php">
             <?php settings_fields( 'a11y_widget_settings' ); ?>
+
+            <fieldset class="a11y-widget-admin-force-all">
+                <legend class="screen-reader-text"><?php esc_html_e( 'Affichage des fonctionnalités', 'a11y-widget' ); ?></legend>
+                <label for="a11y-widget-force-all">
+                    <input type="hidden" name="<?php echo esc_attr( $force_all_option_key ); ?>" value="0" />
+                    <input
+                        type="checkbox"
+                        id="a11y-widget-force-all"
+                        name="<?php echo esc_attr( $force_all_option_key ); ?>"
+                        value="1"
+                        <?php checked( $force_all_features ); ?>
+                    />
+                    <?php esc_html_e( 'Afficher toutes les fonctionnalités du widget', 'a11y-widget' ); ?>
+                </label>
+                <p class="description">
+                    <?php esc_html_e( 'Lorsque cette option est active, toutes les fonctionnalités sont affichées et la personnalisation ci-dessous est ignorée.', 'a11y-widget' ); ?>
+                </p>
+            </fieldset>
+
+            <p class="a11y-widget-admin__hint">
+                <?php esc_html_e( 'Glissez-déposez les fonctionnalités pour les réorganiser ou les déplacer vers une autre catégorie.', 'a11y-widget' ); ?>
+            </p>
 
             <?php if ( empty( $sections ) ) : ?>
                 <p class="a11y-widget-admin-empty">
@@ -160,30 +313,54 @@ function a11y_widget_render_admin_page() {
                         $section_title = isset( $section['title'] ) ? $section['title'] : '';
                         $section_slug  = isset( $section['slug'] ) ? sanitize_title( $section['slug'] ) : '';
                         $children      = isset( $section['children'] ) && is_array( $section['children'] ) ? $section['children'] : array();
+
+                        if ( '' === $section_slug ) {
+                            continue;
+                        }
                         ?>
                         <fieldset class="a11y-widget-admin-section">
                             <legend class="a11y-widget-admin-section__title"><?php echo esc_html( $section_title ); ?></legend>
 
-                            <div class="a11y-widget-admin-section__content">
-                                <?php if ( empty( $children ) ) : ?>
-                                    <p class="a11y-widget-admin-empty">
-                                        <em><?php esc_html_e( 'Aucune fonctionnalité dans cette catégorie.', 'a11y-widget' ); ?></em>
-                                    </p>
-                                <?php else : ?>
-                                    <?php
-                                    foreach ( $children as $feature ) :
-                                        $feature_slug  = isset( $feature['slug'] ) ? sanitize_key( $feature['slug'] ) : '';
-                                        $feature_label = isset( $feature['label'] ) ? $feature['label'] : '';
-                                        $feature_hint  = isset( $feature['hint'] ) ? $feature['hint'] : '';
+                            <div class="a11y-widget-admin-section__content" data-section="<?php echo esc_attr( $section_slug ); ?>">
+                                <input
+                                    type="hidden"
+                                    class="a11y-widget-admin-layout"
+                                    name="<?php echo esc_attr( $layout_option_key ); ?>[<?php echo esc_attr( $section_slug ); ?>]"
+                                    value="<?php echo esc_attr( implode( ',', wp_list_pluck( $children, 'slug' ) ) ); ?>"
+                                />
 
-                                        if ( '' === $feature_slug || '' === $feature_label ) {
-                                            continue;
-                                        }
+                                <p class="a11y-widget-admin-empty a11y-widget-admin-section__empty-message"<?php if ( ! empty( $children ) ) : ?> hidden<?php endif; ?>>
+                                    <em><?php esc_html_e( 'Aucune fonctionnalité dans cette catégorie.', 'a11y-widget' ); ?></em>
+                                </p>
 
-                                        $is_disabled = isset( $disabled_lookup[ $feature_slug ] );
-                                        $input_id    = 'a11y-widget-toggle-' . ( $section_slug ? $section_slug . '-' : '' ) . $feature_slug;
-                                        ?>
-                                        <div class="a11y-widget-admin-feature">
+                                <?php
+                                foreach ( $children as $feature ) :
+                                    $feature_slug  = isset( $feature['slug'] ) ? sanitize_key( $feature['slug'] ) : '';
+                                    $feature_label = isset( $feature['label'] ) ? $feature['label'] : '';
+                                    $feature_hint  = isset( $feature['hint'] ) ? $feature['hint'] : '';
+
+                                    if ( '' === $feature_slug || '' === $feature_label ) {
+                                        continue;
+                                    }
+
+                                    $is_disabled = isset( $disabled_lookup[ $feature_slug ] );
+                                    $input_id    = 'a11y-widget-toggle-' . ( $section_slug ? $section_slug . '-' : '' ) . $feature_slug;
+                                    ?>
+                                    <div class="a11y-widget-admin-feature" data-feature-slug="<?php echo esc_attr( $feature_slug ); ?>">
+                                        <button type="button" class="a11y-widget-admin-feature__handle">
+                                            <span class="screen-reader-text">
+                                                <?php
+                                                printf(
+                                                    /* translators: %s: feature label */
+                                                    esc_html__( 'Déplacer la fonctionnalité « %s »', 'a11y-widget' ),
+                                                    wp_strip_all_tags( $feature_label )
+                                                );
+                                                ?>
+                                            </span>
+                                            <span class="dashicons dashicons-move" aria-hidden="true"></span>
+                                        </button>
+
+                                        <div class="a11y-widget-admin-feature__main">
                                             <div class="a11y-widget-admin-feature__description">
                                                 <label for="<?php echo esc_attr( $input_id ); ?>">
                                                     <span class="a11y-widget-admin-feature__label"><?php echo esc_html( $feature_label ); ?></span>
@@ -209,6 +386,7 @@ function a11y_widget_render_admin_page() {
                                                         name="<?php echo esc_attr( a11y_widget_get_disabled_features_option_name() ); ?>[]"
                                                         value="<?php echo esc_attr( $feature_slug ); ?>"
                                                         <?php checked( $is_disabled ); ?>
+                                                        <?php disabled( $force_all_features ); ?>
                                                     />
                                                     <span class="a11y-widget-switch__ui">
                                                         <span
@@ -220,8 +398,8 @@ function a11y_widget_render_admin_page() {
                                                 </label>
                                             </div>
                                         </div>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
                         </fieldset>
                     <?php endforeach; ?>
@@ -242,6 +420,10 @@ function a11y_widget_render_admin_page() {
  * @return array
  */
 function a11y_widget_filter_disabled_features( $sections ) {
+    if ( a11y_widget_force_all_features_enabled() ) {
+        return $sections;
+    }
+
     $doing_ajax = false;
 
     if ( function_exists( 'wp_doing_ajax' ) ) {
