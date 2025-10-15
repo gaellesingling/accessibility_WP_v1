@@ -42,6 +42,8 @@
             $section_title = isset( $section['title'] ) ? $section['title'] : '';
             $children      = isset( $section['children'] ) ? (array) $section['children'] : array();
             $features_data = array();
+            $section_icon  = isset( $section['icon'] ) ? sanitize_key( $section['icon'] ) : '';
+            $icon_markup   = '';
 
             if ( ! empty( $children ) ) {
                 foreach ( $children as $feature ) {
@@ -54,13 +56,49 @@
                         continue;
                     }
 
-                    $features_data[] = array(
+                    $children_payload = array();
+                    if ( isset( $feature['children'] ) && is_array( $feature['children'] ) ) {
+                        foreach ( $feature['children'] as $sub_feature ) {
+                            $sub_slug       = isset( $sub_feature['slug'] ) ? sanitize_title( $sub_feature['slug'] ) : '';
+                            $sub_label      = isset( $sub_feature['label'] ) ? $sub_feature['label'] : '';
+                            $sub_hint       = isset( $sub_feature['hint'] ) ? $sub_feature['hint'] : '';
+                            $sub_aria_label = isset( $sub_feature['aria_label'] ) ? $sub_feature['aria_label'] : $sub_label;
+
+                            if ( '' === $sub_slug || '' === $sub_label ) {
+                                continue;
+                            }
+
+                            $children_payload[] = array(
+                                'slug'       => $sub_slug,
+                                'label'      => wp_strip_all_tags( $sub_label ),
+                                'hint'       => wp_strip_all_tags( $sub_hint ),
+                                'aria_label' => wp_strip_all_tags( $sub_aria_label ),
+                            );
+                        }
+                    }
+
+                    $feature_payload = array(
                         'slug'       => $feature_slug,
                         'label'      => wp_strip_all_tags( $feature_label ),
                         'hint'       => wp_strip_all_tags( $feature_hint ),
                         'aria_label' => wp_strip_all_tags( $feature_aria_label ),
                     );
+
+                    if ( ! empty( $children_payload ) ) {
+                        $feature_payload['children'] = $children_payload;
+                    }
+
+                    $features_data[] = $feature_payload;
                 }
+            }
+
+            if ( '' !== $section_icon && function_exists( 'a11y_widget_get_icon_markup' ) ) {
+                $icon_markup = a11y_widget_get_icon_markup(
+                    $section_icon,
+                    array(
+                        'class' => 'a11y-tab__icon-svg',
+                    )
+                );
             }
 
             $payload[] = array(
@@ -68,6 +106,7 @@
                 'id'       => $section_id,
                 'slug'     => $section_slug ? $section_slug : $section_id,
                 'title'    => wp_strip_all_tags( $section_title ),
+                'icon'     => $section_icon,
                 'features' => $features_data,
             );
 
@@ -90,8 +129,12 @@
               data-section-index="<?php echo esc_attr( $index ); ?>"
               data-section-id="<?php echo esc_attr( $section_id ); ?>"
               data-tablist-id="<?php echo esc_attr( $tablist_id ); ?>"
+              <?php if ( '' !== $section_icon ) : ?>data-section-icon="<?php echo esc_attr( $section_icon ); ?>"<?php endif; ?>
             >
-              <?php echo esc_html( $section_title ); ?>
+              <?php if ( '' !== $icon_markup ) : ?>
+                <span class="a11y-tab__icon" aria-hidden="true"><?php echo $icon_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+              <?php endif; ?>
+              <span class="a11y-tab__label"><?php echo esc_html( $section_title ); ?></span>
             </button>
           <?php endforeach; ?>
         </nav>
