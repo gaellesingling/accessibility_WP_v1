@@ -150,8 +150,8 @@ fieldset.a11y-widget-admin-section {
 
 .a11y-widget-admin-feature__main {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
   gap: 18px;
   width: 100%;
 }
@@ -194,9 +194,9 @@ fieldset.a11y-widget-admin-section {
 
 .a11y-widget-admin-toggle {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   align-items: center;
-  text-align: right;
+  text-align: left;
   min-width: 0;
 }
 
