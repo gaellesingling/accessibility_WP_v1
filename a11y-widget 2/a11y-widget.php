@@ -77,6 +77,63 @@ function a11y_widget_get_default_sections() {
                     'aria_label'  => __( 'Exemple de réglage pour la vision', 'a11y-widget' ),
                     'placeholder' => true,
                 ),
+                array(
+                    'slug'       => 'vision-daltonisme',
+                    'label'      => __( 'Daltonisme', 'a11y-widget' ),
+                    'hint'       => __( 'Placeholders pour vos filtres adaptés aux différents types de daltonisme.', 'a11y-widget' ),
+                    'aria_label' => __( 'Options pour le daltonisme', 'a11y-widget' ),
+                    'children'   => array(
+                        array(
+                            'slug'        => 'vision-daltonisme-deuteranopie',
+                            'label'       => __( 'Deutéranopie', 'a11y-widget' ),
+                            'hint'        => __( 'Placeholder : appliquez un traitement adapté à la deutéranopie.', 'a11y-widget' ),
+                            'aria_label'  => __( 'Activer le mode deutéranopie', 'a11y-widget' ),
+                            'placeholder' => true,
+                        ),
+                        array(
+                            'slug'        => 'vision-daltonisme-protanopie',
+                            'label'       => __( 'Protanopie', 'a11y-widget' ),
+                            'hint'        => __( 'Placeholder : appliquez un traitement adapté à la protanopie.', 'a11y-widget' ),
+                            'aria_label'  => __( 'Activer le mode protanopie', 'a11y-widget' ),
+                            'placeholder' => true,
+                        ),
+                        array(
+                            'slug'        => 'vision-daltonisme-deuteranomalie',
+                            'label'       => __( 'Deutéranomalie', 'a11y-widget' ),
+                            'hint'        => __( 'Placeholder : ajustez vos scripts pour la deutéranomalie.', 'a11y-widget' ),
+                            'aria_label'  => __( 'Activer le mode deutéranomalie', 'a11y-widget' ),
+                            'placeholder' => true,
+                        ),
+                        array(
+                            'slug'        => 'vision-daltonisme-protanomalie',
+                            'label'       => __( 'Protanomalie', 'a11y-widget' ),
+                            'hint'        => __( 'Placeholder : ajustez vos scripts pour la protanomalie.', 'a11y-widget' ),
+                            'aria_label'  => __( 'Activer le mode protanomalie', 'a11y-widget' ),
+                            'placeholder' => true,
+                        ),
+                        array(
+                            'slug'        => 'vision-daltonisme-tritanopie',
+                            'label'       => __( 'Tritanopie', 'a11y-widget' ),
+                            'hint'        => __( 'Placeholder : appliquez un traitement adapté à la tritanopie.', 'a11y-widget' ),
+                            'aria_label'  => __( 'Activer le mode tritanopie', 'a11y-widget' ),
+                            'placeholder' => true,
+                        ),
+                        array(
+                            'slug'        => 'vision-daltonisme-tritanomalie',
+                            'label'       => __( 'Tritanomalie', 'a11y-widget' ),
+                            'hint'        => __( 'Placeholder : ajustez vos scripts pour la tritanomalie.', 'a11y-widget' ),
+                            'aria_label'  => __( 'Activer le mode tritanomalie', 'a11y-widget' ),
+                            'placeholder' => true,
+                        ),
+                        array(
+                            'slug'        => 'vision-daltonisme-achromatopsie',
+                            'label'       => __( 'Achromatopsie', 'a11y-widget' ),
+                            'hint'        => __( 'Placeholder : appliquez un mode achromatopsie.', 'a11y-widget' ),
+                            'aria_label'  => __( 'Activer le mode achromatopsie', 'a11y-widget' ),
+                            'placeholder' => true,
+                        ),
+                    ),
+                ),
             ),
         ),
         array(
@@ -132,6 +189,48 @@ function a11y_widget_get_default_sections() {
             ),
         ),
     );
+}
+
+/**
+ * Normalize nested children for a feature definition.
+ *
+ * @param array $feature Feature data.
+ *
+ * @return array
+ */
+function a11y_widget_normalize_nested_children( $feature ) {
+    if ( ! is_array( $feature ) ) {
+        return array();
+    }
+
+    if ( empty( $feature['children'] ) || ! is_array( $feature['children'] ) ) {
+        if ( isset( $feature['children'] ) && ! is_array( $feature['children'] ) ) {
+            unset( $feature['children'] );
+        }
+
+        return $feature;
+    }
+
+    $normalized_children = array();
+
+    foreach ( $feature['children'] as $child ) {
+        if ( ! is_array( $child ) || empty( $child['slug'] ) ) {
+            continue;
+        }
+
+        $child_slug = sanitize_key( $child['slug'] );
+
+        if ( '' === $child_slug ) {
+            continue;
+        }
+
+        $child['slug'] = $child_slug;
+        $normalized_children[] = a11y_widget_normalize_nested_children( $child );
+    }
+
+    $feature['children'] = $normalized_children;
+
+    return $feature;
 }
 
 /**
@@ -333,6 +432,7 @@ function a11y_widget_get_sections() {
             }
 
             $child['slug'] = $child_slug;
+            $child         = a11y_widget_normalize_nested_children( $child );
             $sections_by_slug[ $slug ]['children'][ $child_slug ] = $child;
             $sections_by_slug[ $slug ]['children_order'][]        = $child_slug;
             $child_slug_global[ $child_slug ]                     = true;
@@ -386,6 +486,7 @@ function a11y_widget_get_sections() {
             }
 
             $child['slug']                                   = $child_slug;
+            $child                                           = a11y_widget_normalize_nested_children( $child );
             $child_slug_global[ $child_slug ]                = true;
             $sections_by_slug[ $slug ]['children'][ $child_slug ] = $child;
             $sections_by_slug[ $slug ]['children_order'][]        = $child_slug;
