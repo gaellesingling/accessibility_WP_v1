@@ -54,12 +54,39 @@
                         continue;
                     }
 
-                    $features_data[] = array(
+                    $children_payload = array();
+                    if ( isset( $feature['children'] ) && is_array( $feature['children'] ) ) {
+                        foreach ( $feature['children'] as $sub_feature ) {
+                            $sub_slug       = isset( $sub_feature['slug'] ) ? sanitize_title( $sub_feature['slug'] ) : '';
+                            $sub_label      = isset( $sub_feature['label'] ) ? $sub_feature['label'] : '';
+                            $sub_hint       = isset( $sub_feature['hint'] ) ? $sub_feature['hint'] : '';
+                            $sub_aria_label = isset( $sub_feature['aria_label'] ) ? $sub_feature['aria_label'] : $sub_label;
+
+                            if ( '' === $sub_slug || '' === $sub_label ) {
+                                continue;
+                            }
+
+                            $children_payload[] = array(
+                                'slug'       => $sub_slug,
+                                'label'      => wp_strip_all_tags( $sub_label ),
+                                'hint'       => wp_strip_all_tags( $sub_hint ),
+                                'aria_label' => wp_strip_all_tags( $sub_aria_label ),
+                            );
+                        }
+                    }
+
+                    $feature_payload = array(
                         'slug'       => $feature_slug,
                         'label'      => wp_strip_all_tags( $feature_label ),
                         'hint'       => wp_strip_all_tags( $feature_hint ),
                         'aria_label' => wp_strip_all_tags( $feature_aria_label ),
                     );
+
+                    if ( ! empty( $children_payload ) ) {
+                        $feature_payload['children'] = $children_payload;
+                    }
+
+                    $features_data[] = $feature_payload;
                 }
             }
 

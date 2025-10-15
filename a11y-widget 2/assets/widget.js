@@ -247,6 +247,27 @@
     input.addEventListener('change', () => toggleFeature(key, input.checked));
   }
 
+  function buildSwitch(slug, ariaLabel){
+    if(!slug){ return null; }
+    const switchLabel = document.createElement('label');
+    switchLabel.className = 'a11y-switch';
+    switchLabel.setAttribute('data-role', 'feature-switch');
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.setAttribute('data-role', 'feature-input');
+    input.dataset.feature = slug;
+    if(ariaLabel){ input.setAttribute('aria-label', ariaLabel); }
+    const track = document.createElement('span');
+    track.className = 'track';
+    const thumb = document.createElement('span');
+    thumb.className = 'thumb';
+    switchLabel.appendChild(input);
+    switchLabel.appendChild(track);
+    switchLabel.appendChild(thumb);
+    registerFeatureInput(slug, input);
+    return switchLabel;
+  }
+
   function createFeaturePlaceholder(feature){
     if(!featureTemplate || !featureTemplate.content){ return null; }
     const fragment = featureTemplate.content.cloneNode(true);
@@ -273,6 +294,80 @@
     return fragment;
   }
 
+  function createFeatureGroup(feature){
+    const children = Array.isArray(feature.children) ? feature.children : [];
+    if(!children.length){ return null; }
+
+    const article = document.createElement('article');
+    article.className = 'a11y-card has-children';
+    article.setAttribute('data-role', 'feature-card');
+
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.setAttribute('data-role', 'feature-meta');
+
+    const labelEl = document.createElement('span');
+    labelEl.className = 'label';
+    labelEl.textContent = feature.label || '';
+    meta.appendChild(labelEl);
+
+    if(feature.hint){
+      const hintEl = document.createElement('span');
+      hintEl.className = 'hint';
+      hintEl.textContent = feature.hint;
+      meta.appendChild(hintEl);
+    }
+
+    article.appendChild(meta);
+
+    const list = document.createElement('div');
+    list.className = 'a11y-subfeatures';
+
+    let rendered = 0;
+
+    children.forEach(child => {
+      if(!child || typeof child.slug !== 'string' || !child.slug || typeof child.label !== 'string' || !child.label){
+        return;
+      }
+
+      const row = document.createElement('div');
+      row.className = 'a11y-subfeature';
+
+      const rowMeta = document.createElement('div');
+      rowMeta.className = 'sub-meta';
+
+      const rowLabel = document.createElement('span');
+      rowLabel.className = 'label';
+      rowLabel.textContent = child.label;
+      rowMeta.appendChild(rowLabel);
+
+      if(child.hint){
+        const rowHint = document.createElement('span');
+        rowHint.className = 'hint';
+        rowHint.textContent = child.hint;
+        rowMeta.appendChild(rowHint);
+      }
+
+      const switchEl = buildSwitch(child.slug, child.aria_label || child.label || '');
+      if(!switchEl){
+        return;
+      }
+
+      row.appendChild(rowMeta);
+      row.appendChild(switchEl);
+      list.appendChild(row);
+      rendered++;
+    });
+
+    if(!rendered){
+      return null;
+    }
+
+    article.appendChild(list);
+
+    return article;
+  }
+
   function renderSection(sectionId){
     if(!featureGrid){ return; }
     clearFeatureGrid();
@@ -286,10 +381,22 @@
     const fragment = document.createDocumentFragment();
     let renderedCount = 0;
     features.forEach(feature => {
-      if(!feature || typeof feature.slug !== 'string' || !feature.slug || typeof feature.label !== 'string' || !feature.label){
+      if(!feature || typeof feature.label !== 'string' || !feature.label){
         return;
       }
-      const instance = createFeaturePlaceholder(feature);
+
+      const hasChildren = Array.isArray(feature.children) && feature.children.length;
+      let instance = null;
+
+      if(hasChildren){
+        instance = createFeatureGroup(feature);
+      } else {
+        if(typeof feature.slug !== 'string' || !feature.slug){
+          return;
+        }
+        instance = createFeaturePlaceholder(feature);
+      }
+
       if(instance){
         fragment.appendChild(instance);
         renderedCount++;
