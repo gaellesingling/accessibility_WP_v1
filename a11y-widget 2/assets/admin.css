@@ -53,13 +53,10 @@ fieldset.a11y-widget-admin-section {
 
 .a11y-widget-admin-section__content {
   padding: 20px 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
   min-height: 72px;
-}
-
-.a11y-widget-admin-section__content--drag-over {
-  background: #f0f6fc;
-  outline: 2px dashed #2271b1;
-  outline-offset: -12px;
 }
 
 .a11y-widget-admin-feature {
@@ -71,10 +68,6 @@ fieldset.a11y-widget-admin-section {
 .a11y-widget-admin-feature + .a11y-widget-admin-feature {
   padding-top: 18px;
   border-top: 1px solid #eceef0;
-}
-
-.a11y-widget-admin-feature--dragging {
-  opacity: 0.6;
 }
 
 .a11y-widget-admin-feature__handle {

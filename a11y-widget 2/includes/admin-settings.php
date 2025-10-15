@@ -57,15 +57,6 @@ function a11y_widget_get_force_all_features_option_name() {
 }
 
 /**
- * Option name helper for the custom feature layout.
- *
- * @return string
- */
-function a11y_widget_get_feature_layout_option_name() {
-    return 'a11y_widget_feature_layout';
-}
-
-/**
  * Retrieve the list of disabled features stored in the database.
  *
  * @return string[]
@@ -87,17 +78,6 @@ function a11y_widget_get_disabled_features() {
  */
 function a11y_widget_force_all_features_enabled() {
     return (bool) get_option( a11y_widget_get_force_all_features_option_name(), true );
-}
-
-/**
- * Retrieve the stored feature layout with sanitized slugs.
- *
- * @return array<string, string[]>
- */
-function a11y_widget_get_feature_layout() {
-    $layout = get_option( a11y_widget_get_feature_layout_option_name(), array() );
-
-    return a11y_widget_sanitize_feature_layout( $layout );
 }
 
 /**
@@ -127,57 +107,6 @@ function a11y_widget_sanitize_force_all_features( $input ) {
 }
 
 /**
- * Sanitize the custom feature layout option.
- *
- * @param mixed $input Raw input.
- *
- * @return array<string, string[]>
- */
-function a11y_widget_sanitize_feature_layout( $input ) {
-    if ( ! is_array( $input ) ) {
-        return array();
-    }
-
-    $layout = array();
-
-    foreach ( $input as $section_slug => $children ) {
-        $section_slug = sanitize_title( $section_slug );
-
-        if ( '' === $section_slug ) {
-            continue;
-        }
-
-        if ( is_string( $children ) ) {
-            $children = preg_split( '/,/', $children );
-        }
-
-        if ( ! is_array( $children ) ) {
-            continue;
-        }
-
-        $child_lookup = array();
-
-        foreach ( $children as $child_slug ) {
-            if ( is_array( $child_slug ) ) {
-                continue;
-            }
-
-            $child_slug = sanitize_key( $child_slug );
-
-            if ( '' === $child_slug ) {
-                continue;
-            }
-
-            $child_lookup[ $child_slug ] = true;
-        }
-
-        $layout[ $section_slug ] = array_keys( $child_lookup );
-    }
-
-    return $layout;
-}
-
-/**
  * Register plugin settings used by the admin screen.
  */
 function a11y_widget_register_settings() {
@@ -198,16 +127,6 @@ function a11y_widget_register_settings() {
             'type'              => 'boolean',
             'sanitize_callback' => 'a11y_widget_sanitize_force_all_features',
             'default'           => true,
-        )
-    );
-
-    register_setting(
-        'a11y_widget_settings',
-        a11y_widget_get_feature_layout_option_name(),
-        array(
-            'type'              => 'array',
-            'sanitize_callback' => 'a11y_widget_sanitize_feature_layout',
-            'default'           => array(),
         )
     );
 }
@@ -249,7 +168,7 @@ function a11y_widget_enqueue_admin_assets( $hook ) {
     wp_enqueue_script(
         'a11y-widget-admin',
         A11Y_WIDGET_URL . 'assets/admin.js',
-        array(),
+        array( 'jquery', 'jquery-ui-sortable' ),
         A11Y_WIDGET_VERSION,
         true
     );
@@ -269,7 +188,6 @@ function a11y_widget_render_admin_page() {
     $disabled_lookup      = array_fill_keys( $disabled, true );
     $force_all_features   = a11y_widget_force_all_features_enabled();
     $force_all_option_key = a11y_widget_get_force_all_features_option_name();
-    $layout_option_key    = a11y_widget_get_feature_layout_option_name();
     ?>
     <div class="wrap a11y-widget-admin">
         <h1><?php esc_html_e( 'Accessibilité RGAA', 'a11y-widget' ); ?></h1>
@@ -298,10 +216,6 @@ function a11y_widget_render_admin_page() {
                 </p>
             </fieldset>
 
-            <p class="a11y-widget-admin__hint">
-                <?php esc_html_e( 'Glissez-déposez les fonctionnalités pour les réorganiser ou les déplacer vers une autre catégorie.', 'a11y-widget' ); ?>
-            </p>
-
             <?php if ( empty( $sections ) ) : ?>
                 <p class="a11y-widget-admin-empty">
                     <?php esc_html_e( 'Aucune fonctionnalité n’est disponible pour le moment.', 'a11y-widget' ); ?>
@@ -321,22 +235,14 @@ function a11y_widget_render_admin_page() {
                         <fieldset class="a11y-widget-admin-section">
                             <legend class="a11y-widget-admin-section__title"><?php echo esc_html( $section_title ); ?></legend>
 
-                            <?php
-                            $layout_input_id = 'a11y-widget-layout-' . $section_slug;
-                            ?>
-                            <input
-                                type="hidden"
-                                id="<?php echo esc_attr( $layout_input_id ); ?>"
-                                class="a11y-widget-admin-layout"
-                                name="<?php echo esc_attr( $layout_option_key ); ?>[<?php echo esc_attr( $section_slug ); ?>]"
-                                value="<?php echo esc_attr( implode( ',', wp_list_pluck( $children, 'slug' ) ) ); ?>"
-                            />
+                            <div class="a11y-widget-admin-section__content" data-section="<?php echo esc_attr( $section_slug ); ?>">
+                                <input
+                                    type="hidden"
+                                    class="a11y-widget-admin-layout"
+                                    name="<?php echo esc_attr( $layout_option_key ); ?>[<?php echo esc_attr( $section_slug ); ?>]"
+                                    value="<?php echo esc_attr( implode( ',', wp_list_pluck( $children, 'slug' ) ) ); ?>"
+                                />
 
-                            <div
-                                class="a11y-widget-admin-section__content"
-                                data-section="<?php echo esc_attr( $section_slug ); ?>"
-                                data-layout-input="#<?php echo esc_attr( $layout_input_id ); ?>"
-                            >
                                 <p class="a11y-widget-admin-empty a11y-widget-admin-section__empty-message"<?php if ( ! empty( $children ) ) : ?> hidden<?php endif; ?>>
                                     <em><?php esc_html_e( 'Aucune fonctionnalité dans cette catégorie.', 'a11y-widget' ); ?></em>
                                 </p>
