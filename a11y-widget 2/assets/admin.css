@@ -212,13 +212,18 @@ fieldset.a11y-widget-admin-section {
 
 .a11y-widget-admin-subfeature {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
-  align-items: center;
+  align-items: start;
   background: #f7f9fb;
   border: 1px solid #e0e4ea;
   border-radius: 8px;
   padding: 14px 18px;
+}
+
+.a11y-widget-admin-subfeature .a11y-widget-admin-toggle {
+  justify-content: flex-start;
+  text-align: left;
 }
 
 .a11y-widget-admin-subfeature__description {
