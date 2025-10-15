@@ -235,19 +235,15 @@ function a11y_widget_get_icon_markup( $icon_key, $args = array() ) {
             'elements' => array(
                 array(
                     'type' => 'path',
-                    'd'    => 'M6 8.5C6 6.015 8.015 4 10.5 4 12.985 4 15 6.015 15 8.5',
+                    'd'    => 'M6.07 8.07a6 6 0 1 1 11.86 0c0 2.5-2 4-2 5a4 4 0 0 1-8 0',
                 ),
                 array(
                     'type' => 'path',
-                    'd'    => 'M6 8.5V9a7 7 0 0 0 7 7',
+                    'd'    => 'M6 19a2 2 0 0 0 2 2h1',
                 ),
                 array(
                     'type' => 'path',
-                    'd'    => 'M6 8.5C6 11.062 4 12.25 4 14.5S6.5 19 9 19s4-1.5 4-4',
-                ),
-                array(
-                    'type' => 'path',
-                    'd'    => 'M13 15a2 2 0 1 0 4 0v-1c0-3.5-2.5-6-5.5-6S6 7.5 6 11',
+                    'd'    => 'M10 12.75c.5 1.25 1.8 2.25 3.25 2.25A2.75 2.75 0 0 0 16 12.25V11',
                 ),
             ),
         ),
@@ -281,27 +277,23 @@ function a11y_widget_get_icon_markup( $icon_key, $args = array() ) {
             'elements' => array(
                 array(
                     'type' => 'path',
-                    'd'    => 'M9 3.5V12',
+                    'd'    => 'M18 11V6a2 2 0 1 0-4 0v5',
                 ),
                 array(
                     'type' => 'path',
-                    'd'    => 'M13 3.5V12',
+                    'd'    => 'M14 10V4a2 2 0 1 0-4 0v6',
                 ),
                 array(
                     'type' => 'path',
-                    'd'    => 'M17 5V13',
+                    'd'    => 'M10 9.5V3a2 2 0 1 0-4 0v10.5',
                 ),
                 array(
                     'type' => 'path',
-                    'd'    => 'M21 9v4',
+                    'd'    => 'M6 13.5V15a7 7 0 0 0 14 0v-3',
                 ),
                 array(
                     'type' => 'path',
-                    'd'    => 'M7 8V13',
-                ),
-                array(
-                    'type' => 'path',
-                    'd'    => 'M5 13v1.5a7 7 0 0 0 7 7h0a7 7 0 0 0 7-7V12',
+                    'd'    => 'M6 13.5c0-1.2-.5-2.5-.5-3.5',
                 ),
             ),
         ),
