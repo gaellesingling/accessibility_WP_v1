@@ -154,7 +154,7 @@ function a11y_widget_get_default_sections() {
         array(
             'slug'     => 'moteur',
             'title'    => __( 'Moteur', 'a11y-widget' ),
-            'icon'     => 'person',
+            'icon'     => 'hand',
             'children' => array(
                 array(
                     'slug'        => 'moteur-placeholder',
@@ -256,58 +256,52 @@ function a11y_widget_get_icon_markup( $icon_key, $args = array() ) {
             'elements' => array(
                 array(
                     'type' => 'path',
-                    'd'    => 'M8 3a3 3 0 0 0-3 3v1a3 3 0 0 0-1 2.236',
+                    'd'    => 'M9 4A3.5 3.5 0 0 0 5.5 7.5V8.75C4.64 9.18 4 10.3 4 11.6c0 1.3 .62 2.45 1.62 3.04L6 14.86V16c0 2.21 1.79 4 4 4h1.5c.83 0 1.5-.67 1.5-1.5V7.5A3.5 3.5 0 0 0 9 4Z',
                 ),
                 array(
                     'type' => 'path',
-                    'd'    => 'M8 3h2a3 3 0 0 1 3 3v2',
+                    'd'    => 'M15 4A3.5 3.5 0 0 1 18.5 7.5V8.75c.86 .43 1.5 1.55 1.5 2.85 0 1.3-.62 2.45-1.62 3.04L18 14.86V16c0 2.21-1.79 4-4 4h-1.5c-.83 0-1.5-.67-1.5-1.5V7.5A3.5 3.5 0 0 1 15 4Z',
                 ),
                 array(
                     'type' => 'path',
-                    'd'    => 'M8 8a3 3 0 0 0-3 3v1',
+                    'd'    => 'M9 10.5a1.5 1.5 0 0 0 0 3',
                 ),
                 array(
                     'type' => 'path',
-                    'd'    => 'M8 8h2a3 3 0 0 1 3 3v2',
+                    'd'    => 'M15 10.5a1.5 1.5 0 0 1 0 3',
                 ),
                 array(
                     'type' => 'path',
-                    'd'    => 'M16 3a3 3 0 0 1 3 3v1a3 3 0 0 1 1 2.236',
-                ),
-                array(
-                    'type' => 'path',
-                    'd'    => 'M16 3h-2a3 3 0 0 0-3 3v2',
-                ),
-                array(
-                    'type' => 'path',
-                    'd'    => 'M16 8a3 3 0 0 1 3 3v1',
-                ),
-                array(
-                    'type' => 'path',
-                    'd'    => 'M16 8h-2a3 3 0 0 0-3 3v2',
+                    'd'    => 'M12 6v12',
                 ),
             ),
         ),
-        'person' => array(
+        'hand'   => array(
             'viewBox' => '0 0 24 24',
             'elements' => array(
                 array(
-                    'type' => 'circle',
-                    'cx'   => '12',
-                    'cy'   => '5',
-                    'r'    => '2',
+                    'type' => 'path',
+                    'd'    => 'M9 3.5V12',
                 ),
                 array(
                     'type' => 'path',
-                    'd'    => 'M7 21.5 9 13l3-2 3 2 2 8.5',
+                    'd'    => 'M13 3.5V12',
                 ),
                 array(
                     'type' => 'path',
-                    'd'    => 'M5 11h14',
+                    'd'    => 'M17 5V13',
                 ),
                 array(
                     'type' => 'path',
-                    'd'    => 'm9 15 3-2 3 2',
+                    'd'    => 'M21 9v4',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M7 8V13',
+                ),
+                array(
+                    'type' => 'path',
+                    'd'    => 'M5 13v1.5a7 7 0 0 0 7 7h0a7 7 0 0 0 7-7V12',
                 ),
             ),
         ),
