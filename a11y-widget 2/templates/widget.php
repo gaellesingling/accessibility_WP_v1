@@ -18,8 +18,6 @@
     </header>
 
     <div class="a11y-content" id="a11y-content">
-      <p id="a11y-desc" style="padding: 8px 12px; margin: 0;"><?php echo esc_html__('Adaptez le site selon vos préférences. Les options sont des emplacements vides. À vous de brancher vos styles/scripts.', 'a11y-widget'); ?></p>
-
       <?php $sections = a11y_widget_get_sections(); ?>
       <?php if ( ! empty( $sections ) ) : ?>
         <?php
@@ -162,7 +160,6 @@
           <article class="a11y-card" data-role="feature-card">
             <div class="meta" data-role="feature-meta">
               <span class="label" data-role="feature-label"></span>
-              <span class="hint" data-role="feature-hint" hidden></span>
             </div>
             <label class="a11y-switch" data-role="feature-switch">
               <input type="checkbox" data-role="feature-input" data-feature="" aria-label="" />
