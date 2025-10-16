@@ -419,15 +419,9 @@ function a11y_widget_render_admin_page() {
                                             <div class="a11y-widget-admin-feature__description">
                                                 <?php if ( $has_children ) : ?>
                                                     <span class="a11y-widget-admin-feature__label" id="<?php echo esc_attr( $group_label_id ); ?>"><?php echo esc_html( $feature_label ); ?></span>
-                                                    <?php if ( '' !== $feature_hint ) : ?>
-                                                        <span class="description"><?php echo esc_html( $feature_hint ); ?></span>
-                                                    <?php endif; ?>
                                                 <?php else : ?>
                                                     <label for="<?php echo esc_attr( $input_id ); ?>">
                                                         <span class="a11y-widget-admin-feature__label"><?php echo esc_html( $feature_label ); ?></span>
-                                                        <?php if ( '' !== $feature_hint ) : ?>
-                                                            <span class="description"><?php echo esc_html( $feature_hint ); ?></span>
-                                                        <?php endif; ?>
                                                     </label>
                                                 <?php endif; ?>
                                             </div>
@@ -478,9 +472,6 @@ function a11y_widget_render_admin_page() {
                                                         <div class="a11y-widget-admin-subfeature__description">
                                                             <label for="<?php echo esc_attr( $sub_input_id ); ?>" id="<?php echo esc_attr( $sub_label_id ); ?>">
                                                                 <span class="a11y-widget-admin-subfeature__label"><?php echo esc_html( $sub_label ); ?></span>
-                                                                <?php if ( '' !== $sub_hint ) : ?>
-                                                                    <span class="description"><?php echo esc_html( $sub_hint ); ?></span>
-                                                                <?php endif; ?>
                                                             </label>
                                                         </div>
                                                         <div class="a11y-widget-admin-toggle">
