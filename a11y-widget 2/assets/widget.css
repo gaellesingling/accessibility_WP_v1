@@ -37,7 +37,7 @@
   --panel-gutter: clamp(16px, 5vh, 84px);
   position: fixed;
   inset: auto var(--panel-gutter) var(--panel-gutter);
-  width: min(420px, calc(100vw - 2 * var(--panel-gutter)));
+  width: min(360px, calc(100vw - 2 * var(--panel-gutter)));
   max-height: calc(100vh - 2 * var(--panel-gutter));
   background: var(--a11y-surface); color: var(--a11y-text);
   border-radius: var(--a11y-radius); box-shadow: var(--a11y-shadow);
@@ -176,7 +176,7 @@
 
 @media (min-width: 1280px) {
   .a11y-panel {
-    width: min(560px, calc(100vw - 2 * var(--panel-gutter)));
+    width: min(480px, calc(100vw - 2 * var(--panel-gutter)));
   }
 }
 
