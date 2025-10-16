@@ -38,6 +38,34 @@
     </header>
 
     <div class="a11y-content" id="a11y-content">
+      <?php
+      $search_label       = esc_html__( 'Rechercher une fonctionnalité', 'a11y-widget' );
+      $search_placeholder = esc_attr__( 'Rechercher une fonctionnalité…', 'a11y-widget' );
+      $search_empty       = esc_html__( 'Aucun résultat ne correspond à votre recherche pour le moment.', 'a11y-widget' );
+      ?>
+      <form class="a11y-search" role="search" data-role="search-form">
+        <label class="a11y-search__label" for="a11y-search"><?php echo $search_label; ?></label>
+        <input
+          type="search"
+          id="a11y-search"
+          class="a11y-search__input"
+          placeholder="<?php echo $search_placeholder; ?>"
+          autocomplete="off"
+        />
+      </form>
+
+      <section
+        class="a11y-search-results"
+        data-role="search-results"
+        hidden
+        aria-hidden="true"
+        aria-live="polite"
+      >
+        <h3 class="a11y-search-results__title" data-sr-only><?php echo esc_html__( 'Résultats de recherche', 'a11y-widget' ); ?></h3>
+        <div class="a11y-search-results__list" data-role="search-list"></div>
+        <p class="a11y-empty" data-role="search-empty" hidden><?php echo $search_empty; ?></p>
+      </section>
+
       <?php $sections = a11y_widget_get_sections(); ?>
       <?php if ( ! empty( $sections ) ) : ?>
         <?php
