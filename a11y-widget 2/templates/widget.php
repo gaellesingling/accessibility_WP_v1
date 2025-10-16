@@ -9,8 +9,28 @@
 </button>
 
 <div class="a11y-overlay" id="a11y-overlay" role="presentation" aria-hidden="true">
-  <section class="a11y-panel" role="dialog" aria-modal="true" aria-labelledby="a11y-title" aria-describedby="a11y-desc">
+  <section class="a11y-panel" role="dialog" aria-modal="true" aria-labelledby="a11y-title">
+    <?php
+    $panel_label_left  = esc_attr__( 'Placer le panneau à gauche', 'a11y-widget' );
+    $panel_label_right = esc_attr__( 'Placer le panneau à droite', 'a11y-widget' );
+    ?>
     <header class="a11y-header">
+      <button
+        type="button"
+        class="a11y-side-toggle"
+        id="a11y-side-toggle"
+        aria-pressed="false"
+        aria-label="<?php echo $panel_label_left; ?>"
+        data-label-left="<?php echo $panel_label_left; ?>"
+        data-label-right="<?php echo $panel_label_right; ?>"
+        title="<?php echo $panel_label_left; ?>"
+      >
+        <svg class="a11y-side-toggle__icon" viewBox="0 0 24 24" aria-hidden="true">
+          <polyline points="8 5 3 12 8 19" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></polyline>
+          <polyline points="16 5 21 12 16 19" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></polyline>
+          <line x1="12" y1="4" x2="12" y2="20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></line>
+        </svg>
+      </button>
       <svg class="a11y-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm6.75 6.5h-4.5v11a1 1 0 1 1-2 0v-5h-1v5a1 1 0 1 1-2 0v-11h-4.5a1 1 0 1 1 0-2h14a1 1 0 1 1 0 2Z"/></svg>
       <h2 id="a11y-title" class="a11y-title"><?php echo esc_html__('Accessibilité du site', 'a11y-widget'); ?></h2>
       <div class="a11y-spacer" aria-hidden="true"></div>

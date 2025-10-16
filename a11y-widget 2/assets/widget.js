@@ -5,6 +5,7 @@
 (function(){
   const STORAGE_KEY = 'a11y-widget-prefs:v1';
   const LAUNCHER_POS_KEY = 'a11y-widget-launcher-pos:v1';
+  const PANEL_SIDE_KEY = 'a11y-widget-panel-side:v1';
 
   // -------- API publique --------
   const listeners = new Map(); // key -> Set<fct>
@@ -27,9 +28,15 @@
   // ---------- Elements ----------
   const btn = document.getElementById('a11y-launcher');
   const overlay = document.getElementById('a11y-overlay');
+  const panel = overlay ? overlay.querySelector('.a11y-panel') : null;
   const closeBtn = document.getElementById('a11y-close');
   const closeBtn2 = document.getElementById('a11y-close2');
   const resetBtn = document.getElementById('a11y-reset');
+  const sideToggleBtn = document.getElementById('a11y-side-toggle');
+  const sideToggleLabels = sideToggleBtn ? {
+    left: sideToggleBtn.dataset.labelLeft || '',
+    right: sideToggleBtn.dataset.labelRight || ''
+  } : null;
 
   const tablist = document.querySelector('[data-role="section-tablist"]');
   const tabs = tablist ? Array.from(tablist.querySelectorAll('[data-role="section-tab"]')) : [];
@@ -72,6 +79,7 @@
   const featureInputs = new Map();
   let featureState = loadStoredState();
   let activeSectionId = null;
+  let panelSide = 'right';
 
   let launcherLastPos = null;
   let hasCustomLauncherPosition = false;
@@ -131,6 +139,42 @@
         persistLauncherPosition(clamped.x, clamped.y);
       }
     } catch(err){ /* ignore */ }
+  }
+
+  function loadPanelSide(){
+    try {
+      const stored = localStorage.getItem(PANEL_SIDE_KEY);
+      if(stored === 'left' || stored === 'right'){
+        return stored;
+      }
+    } catch(err){ /* ignore */ }
+    return 'right';
+  }
+
+  function persistPanelSide(side){
+    try { localStorage.setItem(PANEL_SIDE_KEY, side); } catch(err){ /* ignore */ }
+  }
+
+  function updateSideToggleUI(side){
+    if(!sideToggleBtn) return;
+    const label = side === 'left'
+      ? ((sideToggleLabels && sideToggleLabels.right) || '')
+      : ((sideToggleLabels && sideToggleLabels.left) || '');
+    if(label){
+      sideToggleBtn.setAttribute('aria-label', label);
+      sideToggleBtn.setAttribute('title', label);
+    }
+    sideToggleBtn.setAttribute('aria-pressed', side === 'left' ? 'true' : 'false');
+  }
+
+  function applyPanelSide(side){
+    const resolved = side === 'left' ? 'left' : 'right';
+    panelSide = resolved;
+    if(panel){
+      panel.classList.toggle('is-left', resolved === 'left');
+      panel.classList.toggle('is-right', resolved === 'right');
+    }
+    updateSideToggleUI(resolved);
   }
 
   function startDragging(clientX, clientY){
@@ -410,8 +454,30 @@
     if(tab && tab.focus){ tab.focus(); }
   }
 
+  function collapseSection(triggerTab){
+    const fallback = triggerTab || tabs[0] || null;
+    activeSectionId = null;
+    tabs.forEach(item => {
+      const isFallback = item === fallback;
+      item.setAttribute('aria-selected', 'false');
+      item.classList.remove('is-active');
+      item.setAttribute('tabindex', isFallback ? '0' : '-1');
+    });
+    panelPartsBySection.forEach(({ panel }) => {
+      if(!panel) return;
+      panel.hidden = true;
+      panel.setAttribute('aria-hidden', 'true');
+      panel.removeAttribute('aria-labelledby');
+      panel.removeAttribute('data-active-section');
+    });
+    if(triggerTab){ focusTab(triggerTab); }
+  }
+
   function setActiveTab(tab, opts={}){
-    if(!tab){ return; }
+    if(!tab){
+      collapseSection(null);
+      return;
+    }
     const sectionId = tab.dataset.sectionId || '';
     const changed = sectionId !== activeSectionId;
     activeSectionId = sectionId;
@@ -430,10 +496,12 @@
         panel.setAttribute('aria-hidden', 'false');
         if(tab.id){ panel.setAttribute('aria-labelledby', tab.id); }
         else { panel.removeAttribute('aria-labelledby'); }
+        panel.setAttribute('data-active-section', sectionId || '');
       } else {
         panel.hidden = true;
         panel.setAttribute('aria-hidden', 'true');
         panel.removeAttribute('aria-labelledby');
+        panel.removeAttribute('data-active-section');
       }
     });
     if(opts.focus){ focusTab(tab); }
@@ -497,7 +565,14 @@
       }
     });
     tabs.forEach(tab => {
-      tab.addEventListener('click', () => setActiveTab(tab));
+      tab.addEventListener('click', () => {
+        const sectionId = tab.dataset.sectionId || '';
+        if(activeSectionId === sectionId){
+          collapseSection(tab);
+        } else {
+          setActiveTab(tab);
+        }
+      });
       tab.addEventListener('keydown', event => handleTabKeydown(event, tab));
     });
     const initiallySelected = tabs.find(tab => tab.getAttribute('aria-selected') === 'true') || tabs[0];
@@ -589,6 +664,7 @@
   }
 
   // ---------- Wiring ----------
+  applyPanelSide(loadPanelSide());
   applyStoredState();
   setupSectionNavigation();
 
@@ -620,6 +696,13 @@
   }
   if(closeBtn){ closeBtn.addEventListener('click', closePanel); }
   if(closeBtn2){ closeBtn2.addEventListener('click', closePanel); }
+  if(sideToggleBtn){
+    sideToggleBtn.addEventListener('click', () => {
+      const next = panelSide === 'left' ? 'right' : 'left';
+      applyPanelSide(next);
+      persistPanelSide(next);
+    });
+  }
   if(resetBtn){
     resetBtn.addEventListener('click', ()=>{
       const keys = new Set([...featureInputs.keys(), ...Object.keys(featureState)]);
@@ -628,10 +711,12 @@
       featureState = {};
       try { localStorage.removeItem(STORAGE_KEY); } catch(err){}
       try { localStorage.removeItem(LAUNCHER_POS_KEY); } catch(err){}
+      try { localStorage.removeItem(PANEL_SIDE_KEY); } catch(err){}
       document.documentElement.style.removeProperty('--a11y-launcher-x');
       document.documentElement.style.removeProperty('--a11y-launcher-y');
       launcherLastPos = null;
       hasCustomLauncherPosition = false;
+      applyPanelSide('right');
     });
   }
   restoreLauncherPosition();

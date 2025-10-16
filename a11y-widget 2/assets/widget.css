@@ -36,14 +36,34 @@
 .a11y-panel {
   --panel-gutter: clamp(16px, 5vh, 84px);
   position: fixed;
-  inset: auto var(--panel-gutter) var(--panel-gutter);
+  inset: auto var(--panel-gutter) var(--panel-gutter) auto;
   width: min(360px, calc(100vw - 2 * var(--panel-gutter)));
   max-height: calc(100vh - 2 * var(--panel-gutter));
   background: var(--a11y-surface); color: var(--a11y-text);
   border-radius: var(--a11y-radius); box-shadow: var(--a11y-shadow);
   display: grid; grid-template-rows: auto 1fr auto; overflow: hidden;
 }
+.a11y-panel.is-left {
+  inset: auto auto var(--panel-gutter) var(--panel-gutter);
+}
+.a11y-panel.is-right {
+  inset: auto var(--panel-gutter) var(--panel-gutter) auto;
+}
 .a11y-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--a11y-surface-elev); border-bottom: 1px solid var(--a11y-border); }
+.a11y-side-toggle {
+  border: none;
+  background: none;
+  padding: 8px;
+  border-radius: 10px;
+  color: var(--a11y-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.a11y-side-toggle:focus-visible { outline: 3px solid #000; outline-offset: 2px; }
+.a11y-side-toggle__icon { width: 24px; height: 24px; display: block; }
+.a11y-side-toggle[aria-pressed="true"] .a11y-side-toggle__icon { transform: scaleX(-1); }
 .a11y-title { font-weight: 700; font-size: 1.05rem; margin: 0; }
 .a11y-spacer { flex: 1 1 auto; }
 .a11y-icon { width: 28px; height: 28px; color: var(--a11y-primary); }
@@ -207,18 +227,24 @@
 }
 .a11y-subfeature {
   display: flex;
-  align-items: center;
-  gap: 16px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
 }
 .a11y-subfeature .sub-meta {
   display: grid;
   gap: 4px;
+  width: 100%;
 }
 .a11y-subfeature .label {
   font-size: .95rem;
 }
 .a11y-card.has-children .a11y-switch {
-  margin-left: auto;
+  margin-left: 0;
+}
+.a11y-subfeature .a11y-switch {
+  align-self: flex-start;
 }
 .a11y-empty { margin: 0 2px 12px; font-size: .9rem; color: #555; }
 
