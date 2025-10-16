@@ -285,16 +285,6 @@
     const fragment = featureTemplate.content.cloneNode(true);
     const labelEl = fragment.querySelector('[data-role="feature-label"]');
     if(labelEl){ labelEl.textContent = feature.label || ''; }
-    const hintEl = fragment.querySelector('[data-role="feature-hint"]');
-    if(hintEl){
-      if(feature.hint){
-        hintEl.textContent = feature.hint;
-        hintEl.hidden = false;
-      } else {
-        hintEl.textContent = '';
-        hintEl.hidden = true;
-      }
-    }
     const inputEl = fragment.querySelector('[data-role="feature-input"]');
     if(inputEl){
       const slug = typeof feature.slug === 'string' ? feature.slug : '';
@@ -323,13 +313,6 @@
     labelEl.textContent = feature.label || '';
     meta.appendChild(labelEl);
 
-    if(feature.hint){
-      const hintEl = document.createElement('span');
-      hintEl.className = 'hint';
-      hintEl.textContent = feature.hint;
-      meta.appendChild(hintEl);
-    }
-
     article.appendChild(meta);
 
     const list = document.createElement('div');
@@ -352,13 +335,6 @@
       rowLabel.className = 'label';
       rowLabel.textContent = child.label;
       rowMeta.appendChild(rowLabel);
-
-      if(child.hint){
-        const rowHint = document.createElement('span');
-        rowHint.className = 'hint';
-        rowHint.textContent = child.hint;
-        rowMeta.appendChild(rowHint);
-      }
 
       const switchEl = buildSwitch(child.slug, child.aria_label || child.label || '');
       if(!switchEl){
