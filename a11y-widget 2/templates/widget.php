@@ -9,8 +9,28 @@
 </button>
 
 <div class="a11y-overlay" id="a11y-overlay" role="presentation" aria-hidden="true">
-  <section class="a11y-panel" role="dialog" aria-modal="true" aria-labelledby="a11y-title" aria-describedby="a11y-desc">
+  <section class="a11y-panel" role="dialog" aria-modal="true" aria-labelledby="a11y-title">
+    <?php
+    $panel_label_left  = esc_attr__( 'Placer le panneau à gauche', 'a11y-widget' );
+    $panel_label_right = esc_attr__( 'Placer le panneau à droite', 'a11y-widget' );
+    ?>
     <header class="a11y-header">
+      <button
+        type="button"
+        class="a11y-side-toggle"
+        id="a11y-side-toggle"
+        aria-pressed="false"
+        aria-label="<?php echo $panel_label_left; ?>"
+        data-label-left="<?php echo $panel_label_left; ?>"
+        data-label-right="<?php echo $panel_label_right; ?>"
+        title="<?php echo $panel_label_left; ?>"
+      >
+        <svg class="a11y-side-toggle__icon" viewBox="0 0 24 24" aria-hidden="true">
+          <polyline points="8 5 3 12 8 19" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></polyline>
+          <polyline points="16 5 21 12 16 19" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></polyline>
+          <line x1="12" y1="4" x2="12" y2="20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></line>
+        </svg>
+      </button>
       <svg class="a11y-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm6.75 6.5h-4.5v11a1 1 0 1 1-2 0v-5h-1v5a1 1 0 1 1-2 0v-11h-4.5a1 1 0 1 1 0-2h14a1 1 0 1 1 0 2Z"/></svg>
       <h2 id="a11y-title" class="a11y-title"><?php echo esc_html__('Accessibilité du site', 'a11y-widget'); ?></h2>
       <div class="a11y-spacer" aria-hidden="true"></div>
@@ -18,8 +38,6 @@
     </header>
 
     <div class="a11y-content" id="a11y-content">
-      <p id="a11y-desc" style="padding: 8px 12px; margin: 0;"><?php echo esc_html__('Adaptez le site selon vos préférences. Les options sont des emplacements vides. À vous de brancher vos styles/scripts.', 'a11y-widget'); ?></p>
-
       <?php $sections = a11y_widget_get_sections(); ?>
       <?php if ( ! empty( $sections ) ) : ?>
         <?php
@@ -110,53 +128,58 @@
                 'features' => $features_data,
             );
 
-            $tab_id    = 'a11y-tab-' . $section_id;
-            $is_active = 0 === (int) $index;
+            $tab_id     = 'a11y-tab-' . $section_id;
+            $panel_id   = 'a11y-panel-' . $section_id;
+            $is_active  = 0 === (int) $index;
             if ( $is_active && '' === $first_tab_id ) {
                 $first_tab_id = $tab_id;
             }
             $tab_class = 'a11y-tab' . ( $is_active ? ' is-active' : '' );
             ?>
-            <button
-              type="button"
-              class="<?php echo esc_attr( $tab_class ); ?>"
-              role="tab"
-              id="<?php echo esc_attr( $tab_id ); ?>"
-              aria-selected="<?php echo $is_active ? 'true' : 'false'; ?>"
-              aria-controls="<?php echo esc_attr( $tabpanel_id ); ?>"
-              tabindex="<?php echo $is_active ? '0' : '-1'; ?>"
-              data-role="section-tab"
-              data-section-index="<?php echo esc_attr( $index ); ?>"
-              data-section-id="<?php echo esc_attr( $section_id ); ?>"
-              data-tablist-id="<?php echo esc_attr( $tablist_id ); ?>"
-              <?php if ( '' !== $section_icon ) : ?>data-section-icon="<?php echo esc_attr( $section_icon ); ?>"<?php endif; ?>
-            >
-              <?php if ( '' !== $icon_markup ) : ?>
-                <span class="a11y-tab__icon" aria-hidden="true"><?php echo $icon_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-              <?php endif; ?>
-              <span class="a11y-tab__label"><?php echo esc_html( $section_title ); ?></span>
-            </button>
+            <div class="a11y-tab-item" role="presentation" data-role="tab-item" data-section-id="<?php echo esc_attr( $section_id ); ?>">
+              <button
+                type="button"
+                class="<?php echo esc_attr( $tab_class ); ?>"
+                role="tab"
+                id="<?php echo esc_attr( $tab_id ); ?>"
+                aria-selected="<?php echo $is_active ? 'true' : 'false'; ?>"
+                aria-controls="<?php echo esc_attr( $panel_id ); ?>"
+                tabindex="<?php echo $is_active ? '0' : '-1'; ?>"
+                data-role="section-tab"
+                data-section-index="<?php echo esc_attr( $index ); ?>"
+                data-section-id="<?php echo esc_attr( $section_id ); ?>"
+                data-tablist-id="<?php echo esc_attr( $tablist_id ); ?>"
+                <?php if ( '' !== $section_icon ) : ?>
+                  data-section-icon="<?php echo esc_attr( $section_icon ); ?>"
+                <?php endif; ?>
+              >
+                <?php if ( '' !== $icon_markup ) : ?>
+                  <span class="a11y-tab__icon" aria-hidden="true"><?php echo $icon_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+                <?php endif; ?>
+                <span class="a11y-tab__label"><?php echo esc_html( $section_title ); ?></span>
+              </button>
+              <section
+                class="a11y-section-panel"
+                role="tabpanel"
+                id="<?php echo esc_attr( $panel_id ); ?>"
+                tabindex="0"
+                aria-live="polite"
+                data-role="section-panel"
+                data-section-id="<?php echo esc_attr( $section_id ); ?>"
+                <?php if ( $is_active && '' !== $first_tab_id ) : ?>aria-labelledby="<?php echo esc_attr( $first_tab_id ); ?>"<?php endif; ?>
+                <?php if ( $is_active ) : ?>aria-hidden="false"<?php else : ?>hidden aria-hidden="true"<?php endif; ?>
+              >
+                <div class="a11y-grid" data-role="feature-grid"></div>
+                <p class="a11y-empty" data-role="feature-empty" hidden><?php echo esc_html__( 'Aucune fonctionnalité disponible pour le moment.', 'a11y-widget' ); ?></p>
+              </section>
+            </div>
           <?php endforeach; ?>
         </nav>
-
-        <section
-          class="a11y-section-panel"
-          role="tabpanel"
-          id="<?php echo esc_attr( $tabpanel_id ); ?>"
-          tabindex="0"
-          aria-live="polite"
-          data-role="section-panel"
-          <?php if ( '' !== $first_tab_id ) : ?>aria-labelledby="<?php echo esc_attr( $first_tab_id ); ?>"<?php endif; ?>
-        >
-          <div class="a11y-grid" data-role="feature-grid"></div>
-          <p class="a11y-empty" data-role="feature-empty" hidden><?php echo esc_html__( 'Aucune fonctionnalité disponible pour le moment.', 'a11y-widget' ); ?></p>
-        </section>
 
         <template id="<?php echo esc_attr( $template_id ); ?>" data-role="feature-placeholder-template">
           <article class="a11y-card" data-role="feature-card">
             <div class="meta" data-role="feature-meta">
               <span class="label" data-role="feature-label"></span>
-              <span class="hint" data-role="feature-hint" hidden></span>
             </div>
             <label class="a11y-switch" data-role="feature-switch">
               <input type="checkbox" data-role="feature-input" data-feature="" aria-label="" />

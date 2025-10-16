@@ -5,6 +5,7 @@
 (function(){
   const STORAGE_KEY = 'a11y-widget-prefs:v1';
   const LAUNCHER_POS_KEY = 'a11y-widget-launcher-pos:v1';
+  const PANEL_SIDE_KEY = 'a11y-widget-panel-side:v1';
 
   // -------- API publique --------
   const listeners = new Map(); // key -> Set<fct>
@@ -27,15 +28,19 @@
   // ---------- Elements ----------
   const btn = document.getElementById('a11y-launcher');
   const overlay = document.getElementById('a11y-overlay');
+  const panel = overlay ? overlay.querySelector('.a11y-panel') : null;
   const closeBtn = document.getElementById('a11y-close');
   const closeBtn2 = document.getElementById('a11y-close2');
   const resetBtn = document.getElementById('a11y-reset');
+  const sideToggleBtn = document.getElementById('a11y-side-toggle');
+  const sideToggleLabels = sideToggleBtn ? {
+    left: sideToggleBtn.dataset.labelLeft || '',
+    right: sideToggleBtn.dataset.labelRight || ''
+  } : null;
 
   const tablist = document.querySelector('[data-role="section-tablist"]');
   const tabs = tablist ? Array.from(tablist.querySelectorAll('[data-role="section-tab"]')) : [];
-  const panel = document.querySelector('[data-role="section-panel"]');
-  const featureGrid = panel ? panel.querySelector('[data-role="feature-grid"]') : null;
-  const featureEmpty = panel ? panel.querySelector('[data-role="feature-empty"]') : null;
+  const panelPartsBySection = new Map();
   const featureTemplate = document.querySelector('[data-role="feature-placeholder-template"]');
   const featureDataScript = document.querySelector('[data-role="feature-data"]');
 
@@ -57,9 +62,24 @@
     }
   });
 
+  tabs.forEach(tab => {
+    const sectionId = tab.dataset.sectionId || '';
+    if(!sectionId){ return; }
+    const container = tab.closest('[data-role="tab-item"]');
+    if(!container){ return; }
+    const panel = container.querySelector('[data-role="section-panel"][data-section-id]');
+    if(!panel){ return; }
+    const grid = panel.querySelector('[data-role="feature-grid"]');
+    const empty = panel.querySelector('[data-role="feature-empty"]');
+    panelPartsBySection.set(sectionId, { panel, grid, empty });
+    if(panel.hidden){ panel.setAttribute('aria-hidden','true'); }
+    else { panel.setAttribute('aria-hidden','false'); }
+  });
+
   const featureInputs = new Map();
   let featureState = loadStoredState();
   let activeSectionId = null;
+  let panelSide = 'right';
 
   let launcherLastPos = null;
   let hasCustomLauncherPosition = false;
@@ -119,6 +139,42 @@
         persistLauncherPosition(clamped.x, clamped.y);
       }
     } catch(err){ /* ignore */ }
+  }
+
+  function loadPanelSide(){
+    try {
+      const stored = localStorage.getItem(PANEL_SIDE_KEY);
+      if(stored === 'left' || stored === 'right'){
+        return stored;
+      }
+    } catch(err){ /* ignore */ }
+    return 'right';
+  }
+
+  function persistPanelSide(side){
+    try { localStorage.setItem(PANEL_SIDE_KEY, side); } catch(err){ /* ignore */ }
+  }
+
+  function updateSideToggleUI(side){
+    if(!sideToggleBtn) return;
+    const label = side === 'left'
+      ? ((sideToggleLabels && sideToggleLabels.right) || '')
+      : ((sideToggleLabels && sideToggleLabels.left) || '');
+    if(label){
+      sideToggleBtn.setAttribute('aria-label', label);
+      sideToggleBtn.setAttribute('title', label);
+    }
+    sideToggleBtn.setAttribute('aria-pressed', side === 'left' ? 'true' : 'false');
+  }
+
+  function applyPanelSide(side){
+    const resolved = side === 'left' ? 'left' : 'right';
+    panelSide = resolved;
+    if(panel){
+      panel.classList.toggle('is-left', resolved === 'left');
+      panel.classList.toggle('is-right', resolved === 'right');
+    }
+    updateSideToggleUI(resolved);
   }
 
   function startDragging(clientX, clientY){
@@ -226,14 +282,14 @@
   }
 
   // ---------- Section navigation ----------
-  function clearFeatureGrid(){
-    if(!featureGrid) return;
-    const inputs = featureGrid.querySelectorAll('[data-role="feature-input"]');
+  function clearFeatureGrid(targetGrid){
+    if(!targetGrid) return;
+    const inputs = targetGrid.querySelectorAll('[data-role="feature-input"]');
     inputs.forEach(input => {
       const key = input.dataset.feature;
       if(key){ featureInputs.delete(key); }
     });
-    featureGrid.innerHTML = '';
+    targetGrid.innerHTML = '';
   }
 
   function registerFeatureInput(key, input){
@@ -273,16 +329,6 @@
     const fragment = featureTemplate.content.cloneNode(true);
     const labelEl = fragment.querySelector('[data-role="feature-label"]');
     if(labelEl){ labelEl.textContent = feature.label || ''; }
-    const hintEl = fragment.querySelector('[data-role="feature-hint"]');
-    if(hintEl){
-      if(feature.hint){
-        hintEl.textContent = feature.hint;
-        hintEl.hidden = false;
-      } else {
-        hintEl.textContent = '';
-        hintEl.hidden = true;
-      }
-    }
     const inputEl = fragment.querySelector('[data-role="feature-input"]');
     if(inputEl){
       const slug = typeof feature.slug === 'string' ? feature.slug : '';
@@ -311,13 +357,6 @@
     labelEl.textContent = feature.label || '';
     meta.appendChild(labelEl);
 
-    if(feature.hint){
-      const hintEl = document.createElement('span');
-      hintEl.className = 'hint';
-      hintEl.textContent = feature.hint;
-      meta.appendChild(hintEl);
-    }
-
     article.appendChild(meta);
 
     const list = document.createElement('div');
@@ -341,13 +380,6 @@
       rowLabel.textContent = child.label;
       rowMeta.appendChild(rowLabel);
 
-      if(child.hint){
-        const rowHint = document.createElement('span');
-        rowHint.className = 'hint';
-        rowHint.textContent = child.hint;
-        rowMeta.appendChild(rowHint);
-      }
-
       const switchEl = buildSwitch(child.slug, child.aria_label || child.label || '');
       if(!switchEl){
         return;
@@ -368,14 +400,22 @@
     return article;
   }
 
+  function getPanelParts(sectionId){
+    if(!sectionId){ return null; }
+    return panelPartsBySection.get(sectionId) || null;
+  }
+
   function renderSection(sectionId){
-    if(!featureGrid){ return; }
-    clearFeatureGrid();
+    const parts = getPanelParts(sectionId);
+    if(!parts){ return; }
+    const { panel, grid, empty } = parts;
+    if(!grid){ return; }
+    clearFeatureGrid(grid);
     if(panel){ panel.setAttribute('data-active-section', sectionId || ''); }
     const section = sectionId ? sectionsById.get(sectionId) : null;
     const features = section && Array.isArray(section.features) ? section.features : [];
     if(!features.length){
-      if(featureEmpty){ featureEmpty.hidden = false; }
+      if(empty){ empty.hidden = false; }
       return;
     }
     const fragment = document.createDocumentFragment();
@@ -403,10 +443,10 @@
       }
     });
     if(renderedCount){
-      if(featureEmpty){ featureEmpty.hidden = true; }
-      featureGrid.appendChild(fragment);
-    } else if(featureEmpty){
-      featureEmpty.hidden = false;
+      if(empty){ empty.hidden = true; }
+      grid.appendChild(fragment);
+    } else if(empty){
+      empty.hidden = false;
     }
   }
 
@@ -414,24 +454,62 @@
     if(tab && tab.focus){ tab.focus(); }
   }
 
+  function collapseSection(triggerTab){
+    const fallback = triggerTab || tabs[0] || null;
+    activeSectionId = null;
+    tabs.forEach(item => {
+      const isFallback = item === fallback;
+      item.setAttribute('aria-selected', 'false');
+      item.classList.remove('is-active');
+      item.setAttribute('tabindex', isFallback ? '0' : '-1');
+    });
+    panelPartsBySection.forEach(({ panel }) => {
+      if(!panel) return;
+      panel.hidden = true;
+      panel.setAttribute('aria-hidden', 'true');
+      panel.removeAttribute('aria-labelledby');
+      panel.removeAttribute('data-active-section');
+    });
+    if(triggerTab){ focusTab(triggerTab); }
+  }
+
   function setActiveTab(tab, opts={}){
-    if(!tab){ return; }
+    if(!tab){
+      collapseSection(null);
+      return;
+    }
     const sectionId = tab.dataset.sectionId || '';
     const changed = sectionId !== activeSectionId;
     activeSectionId = sectionId;
+    const activeParts = getPanelParts(sectionId);
     tabs.forEach(item => {
       const isActive = item === tab;
       item.setAttribute('aria-selected', isActive ? 'true' : 'false');
       item.setAttribute('tabindex', isActive ? '0' : '-1');
       item.classList.toggle('is-active', isActive);
     });
-    if(panel){
-      if(tab.id){ panel.setAttribute('aria-labelledby', tab.id); }
-      else { panel.removeAttribute('aria-labelledby'); }
-    }
+    panelPartsBySection.forEach(({ panel }) => {
+      if(!panel) return;
+      const isActive = panel.dataset.sectionId === sectionId;
+      if(isActive){
+        panel.hidden = false;
+        panel.setAttribute('aria-hidden', 'false');
+        if(tab.id){ panel.setAttribute('aria-labelledby', tab.id); }
+        else { panel.removeAttribute('aria-labelledby'); }
+        panel.setAttribute('data-active-section', sectionId || '');
+      } else {
+        panel.hidden = true;
+        panel.setAttribute('aria-hidden', 'true');
+        panel.removeAttribute('aria-labelledby');
+        panel.removeAttribute('data-active-section');
+      }
+    });
     if(opts.focus){ focusTab(tab); }
-    if(changed || !featureGrid || !featureGrid.children.length){
-      renderSection(sectionId);
+    if(activeParts){
+      const { grid } = activeParts;
+      if(changed || !grid || !grid.children.length){
+        renderSection(sectionId);
+      }
     }
   }
 
@@ -472,12 +550,29 @@
   }
 
   function setupSectionNavigation(){
-    if(!tabs.length || !panel){
-      if(featureEmpty){ featureEmpty.hidden = false; }
+    if(!tabs.length){
+      panelPartsBySection.forEach(({ empty }) => {
+        if(empty){ empty.hidden = false; }
+      });
       return;
     }
+    const defaultSectionId = tabs.length ? (tabs[0].dataset.sectionId || '') : '';
+    panelPartsBySection.forEach(({ panel }) => {
+      if(!panel) return;
+      if(panel.hidden !== true && panel.dataset.sectionId !== defaultSectionId){
+        panel.hidden = true;
+        panel.setAttribute('aria-hidden','true');
+      }
+    });
     tabs.forEach(tab => {
-      tab.addEventListener('click', () => setActiveTab(tab));
+      tab.addEventListener('click', () => {
+        const sectionId = tab.dataset.sectionId || '';
+        if(activeSectionId === sectionId){
+          collapseSection(tab);
+        } else {
+          setActiveTab(tab);
+        }
+      });
       tab.addEventListener('keydown', event => handleTabKeydown(event, tab));
     });
     const initiallySelected = tabs.find(tab => tab.getAttribute('aria-selected') === 'true') || tabs[0];
@@ -569,6 +664,7 @@
   }
 
   // ---------- Wiring ----------
+  applyPanelSide(loadPanelSide());
   applyStoredState();
   setupSectionNavigation();
 
@@ -600,6 +696,13 @@
   }
   if(closeBtn){ closeBtn.addEventListener('click', closePanel); }
   if(closeBtn2){ closeBtn2.addEventListener('click', closePanel); }
+  if(sideToggleBtn){
+    sideToggleBtn.addEventListener('click', () => {
+      const next = panelSide === 'left' ? 'right' : 'left';
+      applyPanelSide(next);
+      persistPanelSide(next);
+    });
+  }
   if(resetBtn){
     resetBtn.addEventListener('click', ()=>{
       const keys = new Set([...featureInputs.keys(), ...Object.keys(featureState)]);
@@ -608,10 +711,12 @@
       featureState = {};
       try { localStorage.removeItem(STORAGE_KEY); } catch(err){}
       try { localStorage.removeItem(LAUNCHER_POS_KEY); } catch(err){}
+      try { localStorage.removeItem(PANEL_SIDE_KEY); } catch(err){}
       document.documentElement.style.removeProperty('--a11y-launcher-x');
       document.documentElement.style.removeProperty('--a11y-launcher-y');
       launcherLastPos = null;
       hasCustomLauncherPosition = false;
+      applyPanelSide('right');
     });
   }
   restoreLauncherPosition();
