@@ -329,7 +329,13 @@ function a11y_widget_render_admin_page() {
                             continue;
                         }
                         ?>
-                        <fieldset class="a11y-widget-admin-section">
+                        <?php
+                        $section_classes = array(
+                            'a11y-widget-admin-section',
+                            'a11y-widget-admin-section--' . $section_slug,
+                        );
+                        ?>
+                        <fieldset class="<?php echo esc_attr( implode( ' ', $section_classes ) ); ?>">
                             <legend class="a11y-widget-admin-section__title">
                                 <?php if ( '' !== $icon_markup ) : ?>
                                     <span class="a11y-widget-admin-section__icon" aria-hidden="true"><?php echo $icon_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
