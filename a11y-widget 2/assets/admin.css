@@ -186,12 +186,6 @@ fieldset.a11y-widget-admin-section {
   margin-bottom: 4px;
 }
 
-.a11y-widget-admin-feature .description {
-  margin: 0;
-  color: #646970;
-  font-size: 13px;
-}
-
 .a11y-widget-admin-toggle {
   display: flex;
   justify-content: flex-start;
